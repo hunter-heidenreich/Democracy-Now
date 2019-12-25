@@ -88,8 +88,6 @@ class LegislativeActivity:
         for action in actions.find_all('floor_action'):
             self._floor_actions.append(FloorAction(action))
 
-        pdb.set_trace()
-
     def __repr__(self):
         return 'Legislative Activity: {}'.format(self._date) + '\n' \
                + self.get_votes_as_text() + '\n' + self.get_bills_as_text()
