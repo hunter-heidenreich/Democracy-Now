@@ -7,11 +7,13 @@ from glob import glob
 import pdb
 
 from representative import Representative
+from session import Session
 
 
 class USHouse:
 
     ROOT_URL = 'https://www.house.gov/'
+    ROOT_DIR = 'data/us/federal/house/'
 
     def __init__(self, load=True):
         self._reps = []
@@ -20,6 +22,8 @@ class USHouse:
         self._by_committee = defaultdict(list)
         self._by_party = defaultdict(list)
         self._by_name = {}
+
+        self._session = None
 
         if load:
             self.load_reps()
@@ -78,7 +82,12 @@ class USHouse:
         except KeyError:
             return None
 
+    def get_floor(self, floor='HDoc-116-1-FloorProceedings.xml'):
+        self._session = Session(source=floor)
+
 
 if __name__ == '__main__':
     house = USHouse(load=True)
-    pdb.set_trace()
+    house.get_floor()
+
+    # pdb.set_trace()
