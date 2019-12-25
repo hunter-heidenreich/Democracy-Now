@@ -3,7 +3,8 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from vote import  Vote
+from vote import Vote
+from bill import Bill
 
 import pdb
 
@@ -25,6 +26,8 @@ class ActionItem:
 
             if self._type == 'vote':
                 self._data = Vote(url=self._link)
+            elif self._type == 'bill':
+                self._data = Bill(url=self._link)
 
     def __repr__(self):
         if self._type:
@@ -89,7 +92,7 @@ class LegislativeActivity:
 
     def __repr__(self):
         return 'Legislative Activity: {}'.format(self._date) + '\n' \
-               + self.get_votes_as_text()
+               + self.get_votes_as_text() + '\n' + self.get_bills_as_text()
 
     def get_votes(self):
         return [act for act in self._floor_actions if
@@ -101,6 +104,10 @@ class LegislativeActivity:
     def get_bills(self):
         return [act for act in self._floor_actions if
                 act.action_type == 'bill']
+
+    def get_bills_as_text(self):
+        return '\n'.join(
+            ['Bills: '] + ['\t' + b.__repr__() for b in self.get_bills()])
 
     def get_types(self):
         return set([act.action_type for act in self._floor_actions])
