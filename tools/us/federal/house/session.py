@@ -1,7 +1,9 @@
+import datetime
+
 import requests
 from bs4 import BeautifulSoup
 
-import datetime
+from vote import  Vote
 
 import pdb
 
@@ -14,11 +16,15 @@ class ActionItem:
         self._text = None
         self._link = None
         self._type = None
+        self._data = None
 
         if item:
             self._text = item.text
             self._link = item.get('href')
             self._type = item.get('rel')
+
+            if self._type == 'vote':
+                self._data = Vote(url=self._link)
 
     def __repr__(self):
         if self._type:
