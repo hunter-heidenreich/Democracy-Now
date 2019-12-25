@@ -28,7 +28,7 @@ class ActionItem:
 
     def __repr__(self):
         if self._type:
-            return '{} ({})'.format(self._title, self._type)
+            return '{} ({}) {}'.format(self._title, self._type, self._data)
         else:
             return self._title
 
@@ -88,11 +88,15 @@ class LegislativeActivity:
         pdb.set_trace()
 
     def __repr__(self):
-        return 'Legislative Activity: {}'.format(self._date)
+        return 'Legislative Activity: {}'.format(self._date) + '\n' \
+               + self.get_votes_as_text()
 
     def get_votes(self):
         return [act for act in self._floor_actions if
                 act.action_type == 'vote']
+
+    def get_votes_as_text(self):
+        return '\n'.join(['Votes: '] + ['\t' + v.__repr__() for v in self.get_votes()])
 
     def get_bills(self):
         return [act for act in self._floor_actions if
@@ -112,6 +116,7 @@ class Session:
         self._congress = None
         self._session = None
         self._source = source
+        self._activities = []
 
         self.load()
 
@@ -130,7 +135,7 @@ class Session:
         self._session = soup.find('session').text
 
         for leg in soup.find_all('legislative_activity'):
-            l = LegislativeActivity(leg)
+            self._activities.append(LegislativeActivity(leg))
 
         pdb.set_trace()
 
