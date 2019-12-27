@@ -87,5 +87,3 @@ class USHouse:
 if __name__ == '__main__':
     house = USHouse(load=True)
     house.get_floor()
-
-    # pdb.set_trace()

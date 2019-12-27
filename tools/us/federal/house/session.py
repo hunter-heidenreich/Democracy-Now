@@ -118,22 +118,27 @@ class Session:
     ROOT_URL = 'http://clerk.house.gov/floorsummary/'
     ROOT_DIR = 'data/us/federal/house/session/'
 
-    def __init__(self, source=''):
+    def __init__(self, source='', force_reload=False):
 
         self._congress = None
         self._session = None
         self._source = source
         self._activities = []
 
-        self.load()
+        self.load(force_reload=force_reload)
 
-    def load(self):
+    def load(self, force_reload=False):
         try:
+            if force_reload:
+                raise FileNotFoundError
+
             with open(self.ROOT_DIR + 'web/' + self._source, 'r+') as infile:
                 xml = infile.read()
         except FileNotFoundError:
-            xml = requests.get(self.ROOT_URL + 'web/' + self._source).text
-            with open(self.ROOT_DIR + self._source, 'w+') as out_file:
+            # TODO: Verify if this char issue is just an issue with 2019 data
+            xml = requests.get(self.ROOT_URL + self._source).text[3:]
+
+            with open(self.ROOT_DIR + 'web/' + self._source, 'w+') as out_file:
                 out_file.write(xml)
 
         soup = BeautifulSoup(xml, 'xml')
