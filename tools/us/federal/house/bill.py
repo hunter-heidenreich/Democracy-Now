@@ -17,11 +17,18 @@ class Bill:
             raise ValueError('ValueError: Unspecified bill source.')
 
     def __repr__(self):
-        return '{} ({}...)'.format(self._title, self._summary[:50])
+        if self._summary:
+            return '{} ({}...)'.format(self._title, self._summary[:50])
+        else:
+            return self._title
 
     def load_from_url(self, url):
         html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
 
         self._title = next(soup.find('h1', attrs={'class': 'legDetail'}).strings)
-        self._summary = soup.find('div', attrs={'id': 'bill-summary'}).find_all('p')[-1].text
+        try:
+            self._summary = soup.find('div', attrs={'id': 'bill-summary'}).find_all('p')[-1].text
+        except AttributeError:
+            # This seems to occur when a summary has not be generated yet
+            self._summary = None

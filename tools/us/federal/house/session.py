@@ -3,6 +3,8 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
+from tqdm import tqdm
+
 from vote import Vote
 from bill import Bill
 
@@ -82,10 +84,12 @@ class LegislativeActivity:
         date = data.find('legislative_day').get('date')
         self._date = datetime.date(int(date[0:4]), int(date[4:6]), int(date[6:]))
 
+        print('Legislative Action: {}'.format(self._date))
+
         self._floor_actions = []
 
         actions = data.find('floor_actions')
-        for action in actions.find_all('floor_action'):
+        for action in tqdm(actions.find_all('floor_action')):
             self._floor_actions.append(FloorAction(action))
 
     def __repr__(self):
