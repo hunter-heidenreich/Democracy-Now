@@ -129,10 +129,10 @@ class Session:
 
     def load(self):
         try:
-            with open(self.ROOT_DIR + self._source, 'r+') as infile:
+            with open(self.ROOT_DIR + 'web/' + self._source, 'r+') as infile:
                 xml = infile.read()
         except FileNotFoundError:
-            xml = requests.get(self.ROOT_URL + self._source).text
+            xml = requests.get(self.ROOT_URL + 'web/' + self._source).text
             with open(self.ROOT_DIR + self._source, 'w+') as out_file:
                 out_file.write(xml)
 
@@ -143,7 +143,6 @@ class Session:
 
         for leg in soup.find_all('legislative_activity'):
             self._activities.append(LegislativeActivity(leg))
-
 
     def __repr__(self):
         return 'US House #{} - Session {}'.format(self._congress,
