@@ -50,9 +50,12 @@ class Vote:
                                              self._vote_totals['Nay'],
                                              self._vote_result)
 
-    def load_from_url(self, url):
+    def load_from_url(self, url, force_reload=False):
         cache = url.split('/')[-1]
         try:
+            if force_reload:
+                raise FileNotFoundError
+
             with open(self.ROOT_DIR + 'web/' + cache, 'r+') as in_file:
                 xml = in_file.read()
         except FileNotFoundError:
