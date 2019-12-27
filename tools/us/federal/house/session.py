@@ -8,8 +8,6 @@ from tqdm import tqdm
 from vote import Vote
 from bill import Bill
 
-import pdb
-
 
 class ActionItem:
 
@@ -146,7 +144,6 @@ class Session:
         for leg in soup.find_all('legislative_activity'):
             self._activities.append(LegislativeActivity(leg))
 
-        pdb.set_trace()
 
     def __repr__(self):
         return 'US House #{} - Session {}'.format(self._congress,

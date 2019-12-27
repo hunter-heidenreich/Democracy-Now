@@ -55,7 +55,13 @@ class Vote:
         self._majority = soup.find('majority').text
         self._congress = soup.find('congress').text
         self._session = soup.find('session').text
-        self._chamber = soup.find('chamber').text
+        try:
+            self._chamber = soup.find('chamber').text
+        except AttributeError:
+            # Seems like there's at least 1 vote
+            # where the chamber is listed as
+            # a committee for some reason
+            self._chamber = soup.find('committee').text
 
         self._legis_num = soup.find('legis-num').text
 
