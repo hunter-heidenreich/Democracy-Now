@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+from representative import Representative2
+
 
 class Bill:
 
@@ -10,6 +12,8 @@ class Bill:
 
         self._title = None
         self._summary = None
+
+        self._sponsor = None
 
         if url:
             self.load_from_url(url)
@@ -45,3 +49,8 @@ class Bill:
         except AttributeError:
             # This seems to occur when a summary has not be generated yet
             self._summary = None
+
+        for i, tr in enumerate(soup.find('div', attrs={'class': 'overview'}).find_all('tr')):
+            if i == 0:
+                url = 'https://www.congress.gov' + tr.find('a').get('href')
+                self._sponsor = Representative2(url=url)
