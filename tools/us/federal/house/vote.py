@@ -51,7 +51,7 @@ class Vote:
                                              self._vote_result)
 
     def load_from_url(self, url, force_reload=False):
-        cache = url.split('/')[-1]
+        cache = url.split('://')[-1].replace('/', '_')
         try:
             if force_reload:
                 raise FileNotFoundError
