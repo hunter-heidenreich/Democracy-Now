@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 
 class Vote:
 
+    ROOT_DIR = 'data/us/federal/house/votes/'
+
     def __init__(self, url=None, filename=None):
 
         self._majority = None
@@ -49,7 +51,15 @@ class Vote:
                                              self._vote_result)
 
     def load_from_url(self, url):
-        xml = requests.get(url).text
+        cache = url.split('/')[-1]
+        try:
+            with open(self.ROOT_DIR + 'web/' + cache, 'r+') as in_file:
+                xml = in_file.read()
+        except FileNotFoundError:
+            xml = requests.get(url).text
+            with open(self.ROOT_DIR + 'web/' + cache, 'w+') as out_file:
+                out_file.write(xml)
+
         soup = BeautifulSoup(xml, 'xml')
 
         self._majority = soup.find('majority').text
