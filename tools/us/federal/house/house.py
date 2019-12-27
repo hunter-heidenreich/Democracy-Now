@@ -23,15 +23,15 @@ class USHouse:
 
         self._session = None
 
-        if load:
-            self.load_reps()
-        else:
-            self.download_reps()
-
-        self.load_by_state()
-        self.load_by_committee()
-        self.load_by_party()
-        self.load_by_name()
+        # if load:
+        #     self.load_reps()
+        # else:
+        #     self.download_reps()
+        #
+        # self.load_by_state()
+        # self.load_by_committee()
+        # self.load_by_party()
+        # self.load_by_name()
 
     def load_reps(self):
         for f in glob(Representative.ROOT_DIR + '*.json'):
