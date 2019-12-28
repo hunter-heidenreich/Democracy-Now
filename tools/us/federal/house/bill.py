@@ -1,3 +1,5 @@
+import json
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -69,6 +71,8 @@ class Bill:
 
         overview = soup.find('div', attrs={'class': 'overview'})
         self._extract_overview(overview)
+
+        self.to_json()
 
     def _get_html(self, force_reload):
         """
@@ -144,9 +148,11 @@ class Bill:
                         chunks = t.split(' ')
                         t = chunks[0] + ' 0' + chunks[1]
 
+                    dt = datetime.strptime(t, '%m/%d/%y %I:%M%p')
+                    dt = dt.timestamp()
                     self._overview['meetings'].append({
                         'url': self.ROOT_URL + a.get('href'),
-                        'datetime': datetime.strptime(t, '%m/%d/%y %I:%M%p')
+                        'datetime': dt
                     })
             elif th == 'Notes:':
                 # TODO: Consider handling this differently
@@ -159,6 +165,32 @@ class Bill:
                 print('New Overview in Bill Identified!')
                 import pdb
                 pdb.set_trace()
+
+    def to_json(self):
+        """
+        Dumps the Bill to a JSON readable format
+        """
+        filename = self._title.split(' - ')[0] + '.json'
+
+        json.dump({
+            'title': self._title,
+            'summary': self._summary,
+            'sources': self._sources,
+            'overview': self._overview
+        }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
+
+    def from_json(self, filename):
+        """
+        Given a filename, reads a JSON formatted Bill
+        into a Bill object
+
+        :param filename: The location on the local disk - str
+        """
+        data = json.load(open(filename))
+        self._title = data['title']
+        self._summary = data['summary']
+        self._sources = data['sources']
+        self._overview = data['overview']
 
 
 if __name__ == '__main__':
