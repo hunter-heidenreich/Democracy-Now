@@ -1,11 +1,17 @@
 import datetime
 import calendar
+import json
 
 import requests
 from bs4 import BeautifulSoup
 
 
 class Vote:
+
+    """
+    This class represents a vote (a roll call vote)
+    for the House of Representatives
+    """
 
     ROOT_DIR = 'data/us/federal/house/votes/'
 
@@ -39,7 +45,7 @@ class Vote:
         if url:
             self.load_from_url(url)
         elif filename:
-            pass
+            self.from_json(filename)
         else:
             raise ValueError('ValueError: Unspecified vote source.')
 
@@ -120,3 +126,41 @@ class Vote:
                 'name': leg.text,
                 'vote': vot.text
             })
+
+        self.to_json()
+
+    def to_json(self):
+        filename = 'house_{}_{}.json'.format(self._congress,
+                                             self._legis_num.replace(' ', ''))
+        json.dump({
+            'majority': self._majority,
+            'congress': self._congress,
+            'session': self._session,
+            'chamber': self._chamber,
+            'legis_num': self._legis_num,
+            'vote_question': self._vote_question,
+            'vote_type': self._vote_type,
+            'vote_result': self._vote_result,
+            'vote_desc': self._vote_desc,
+            'vote_totals': self._vote_totals,
+            'datetime': self._datetime.timestamp(),
+            'party_votes': self._party_vote_totals,
+            'recorded_votes': self._recorded_votes
+        }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
+
+    def from_json(self, filename):
+        data = json.load(open(filename))
+
+        self._majority = data['majority']
+        self._congress = data['congress']
+        self._session = data['session']
+        self._chamber = data['chamber']
+        self._legis_num = data['legis_num']
+        self._vote_question = data['vote_question']
+        self._vote_type = data['vote_type']
+        self._vote_result = data['vote_result']
+        self._vote_desc = data['vote_desc']
+        self._vote_totals = data['vote_totals']
+        self._datetime = datetime.datetime.fromtimestamp(data['datetime'])
+        self._party_vote_totals = data['party_votes']
+        self._recorded_votes = data['recorded_votes']
