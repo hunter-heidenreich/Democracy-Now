@@ -14,6 +14,7 @@ class Bill:
         self._summary = None
 
         self._sponsor = None
+        self._committees = None
 
         if url:
             self.load_from_url(url)
@@ -50,7 +51,39 @@ class Bill:
             # This seems to occur when a summary has not be generated yet
             self._summary = None
 
-        for i, tr in enumerate(soup.find('div', attrs={'class': 'overview'}).find_all('tr')):
-            if i == 0:
+        overview = soup.find('div', attrs={'class': 'overview'})
+        for i, tr in enumerate(overview.find_all('tr')):
+            th = tr.find('th').text
+
+            if th == 'Sponsor:':  # Sponsor Row
                 url = 'https://www.congress.gov' + tr.find('a').get('href')
                 self._sponsor = Representative2(url=url)
+            elif th == 'Committees:':  # Committee Row
+                td = tr.find('td').text
+                houses = td.split(' | ')
+                house = houses.pop()
+                while 'House' not in house:
+                    house = houses.pop()
+                committees = house.split('House - ')[-1].split(';')
+                self._committees = list(map(lambda s: s.strip(), committees))
+
+                print('{} -> {}'.format(td, self._committees))
+            elif th == 'Committee Reports:':
+                pass
+            elif th == 'Latest Action:':
+                pass
+            elif th == 'Roll Call Votes:':
+                pass
+            else:
+                print('New Overview in Bill Identified!')
+                import pdb
+                pdb.set_trace()
+
+
+if __name__ == '__main__':
+    from glob import glob
+    from tqdm import tqdm
+
+    for f in tqdm(glob('data/us/federal/house/bills/web/*')):
+        short = f.split('/')[-1]
+        Bill(url=short)
