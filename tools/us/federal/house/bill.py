@@ -3,8 +3,6 @@ from bs4 import BeautifulSoup
 
 from datetime import datetime
 
-from representative import Representative2
-
 
 class Bill:
 
@@ -15,17 +13,7 @@ class Bill:
         self._title = None
         self._summary = None
 
-        self._sponsor = None
-        self._committees = None
-        self._committee_report = None
-
-        self._latest_action = None
-
-        self._num_rollcall_votes = 0
-
-        self._meetings = []
-
-        self._notes = None
+        self._overview = {}
 
         if url:
             self.load_from_url(url)
@@ -65,10 +53,12 @@ class Bill:
         overview = soup.find('div', attrs={'class': 'overview'})
         for i, tr in enumerate(overview.find_all('tr')):
             th = tr.find('th').text
-
             if th == 'Sponsor:':
-                url = 'https://www.congress.gov' + tr.find('a').get('href')
-                self._sponsor = Representative2(url=url)
+                a = tr.find('a')
+                self._overview['sponsor'] = {
+                    'url': 'https://www.congress.gov' + a.get('href'),
+                    'name': a.text
+                }
             elif th == 'Committees:':
                 td = tr.find('td').text
                 if 'House' in td:
@@ -77,20 +67,22 @@ class Bill:
                     while 'House' not in house:
                         house = houses.pop()
                     committees = house.split('House - ')[-1].split(';')
-                    self._committees = list(map(lambda s: s.strip(), committees))
+                    self._overview['committees'] = \
+                        list(map(lambda s: s.strip(), committees))
             elif th == 'Committee Reports:':
                 a = tr.find('td').find('a')
-                self._committee_report = {
+                self._overview['committee_report'] = {
                     'url': 'https://www.congress.gov' + a.get('href'),
                     'report': a.text
                 }
             elif th == 'Latest Action:':
                 # TODO: Do we want to handle the extra text?
-                self._latest_action = tr.find('td').text
+                self._overview['latest_action'] = tr.find('td').text
             elif th == 'Roll Call Votes:':
                 tds = list(tr.find('td').strings)
-                self._num_rollcall_votes = int(tds[-1].split(' ')[0])
+                self._overview['roll call count'] = int(tds[-1].split(' ')[0])
             elif th == 'Committee Meetings:':
+                self._overview['meetings'] = []
                 for a in tr.find('td').find_all('a'):
                     t = a.text
                     if t == '(All Meetings)':
@@ -101,7 +93,7 @@ class Bill:
                         chunks = t.split(' ')
                         t = chunks[0] + ' 0' + chunks[1]
 
-                    self._meetings.append({
+                    self._overview['meetings'].append({
                         'url': 'https://www.congress.gov' + a.get('href'),
                         'datetime': datetime.strptime(t, '%m/%d/%y %I:%M%p')
                     })
@@ -111,7 +103,7 @@ class Bill:
                 # so it doesn't seem to relevant to write excessive code
                 # for handling what's contained here,
                 # other than grabbing the text
-                self._notes = tr.find('td').text
+                self._overview['notes'] = tr.find('td').text
             else:
                 print('New Overview in Bill Identified!')
                 import pdb
@@ -124,4 +116,4 @@ if __name__ == '__main__':
 
     for f in tqdm(glob('data/us/federal/house/bills/web/*')):
         short = f.split('/')[-1]
-        Bill(url=short)
+        b = Bill(url=short)

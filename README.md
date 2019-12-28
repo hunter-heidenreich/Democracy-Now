@@ -31,7 +31,7 @@ More to come soon once noteworthy progress has been made!
 This is where I'm placing items that still need to be done 
 so that they aren't forgotten:
 
-- Extracting more information from bills
+- Extracting information from bill tabs (instead of just overview)
 - Transition repo fully to new representative objects 
 - Better way of handling sessions and house in total
 - Probably want a tool to initiate and seed downloads, 
