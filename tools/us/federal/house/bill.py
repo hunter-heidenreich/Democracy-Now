@@ -55,24 +55,27 @@ class Bill:
         for i, tr in enumerate(overview.find_all('tr')):
             th = tr.find('th').text
 
-            if th == 'Sponsor:':  # Sponsor Row
+            if th == 'Sponsor:':
                 url = 'https://www.congress.gov' + tr.find('a').get('href')
                 self._sponsor = Representative2(url=url)
-            elif th == 'Committees:':  # Committee Row
+            elif th == 'Committees:':
                 td = tr.find('td').text
-                houses = td.split(' | ')
-                house = houses.pop()
-                while 'House' not in house:
+                if 'House' in td:
+                    houses = td.split(' | ')
                     house = houses.pop()
-                committees = house.split('House - ')[-1].split(';')
-                self._committees = list(map(lambda s: s.strip(), committees))
-
-                print('{} -> {}'.format(td, self._committees))
+                    while 'House' not in house:
+                        house = houses.pop()
+                    committees = house.split('House - ')[-1].split(';')
+                    self._committees = list(map(lambda s: s.strip(), committees))
             elif th == 'Committee Reports:':
                 pass
             elif th == 'Latest Action:':
                 pass
             elif th == 'Roll Call Votes:':
+                pass
+            elif th == 'Committee Meetings:':
+                pass
+            elif th == 'Notes:':
                 pass
             else:
                 print('New Overview in Bill Identified!')
