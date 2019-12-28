@@ -124,8 +124,11 @@ class Bill:
                     'report': a.text
                 }
             elif th == 'Latest Action:':
-                # TODO: Do we want to handle the extra text?
-                self._overview['latest_action'] = tr.find('td').text
+                temp = tr.find('td').text.strip()
+                temp = temp.split('\xa0')[0].strip()
+                temp = temp.split('(TXT | PDF)')[0].strip()
+                self._overview['latest_action'] = temp
+
             elif th == 'Roll Call Votes:':
                 tds = list(tr.find('td').strings)
                 self._overview['roll call count'] = int(tds[-1].split(' ')[0])
