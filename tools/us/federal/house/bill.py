@@ -57,9 +57,27 @@ class Bill:
         self._sources['url'] = url
         self._sources['html'] = self.ROOT_DIR + 'web/' + cache
 
-        import pdb
-        pdb.set_trace()
+        soup = BeautifulSoup(self._get_html(force_reload), 'html.parser')
 
+        self._title = next(soup.find('h1', attrs={'class': 'legDetail'}).strings)
+
+        try:
+            self._summary = soup.find('div', attrs={'id': 'bill-summary'}).find_all('p')[-1].text
+        except AttributeError:
+            # This seems to occur when a summary has not be generated yet
+            self._summary = None
+
+        overview = soup.find('div', attrs={'class': 'overview'})
+        self._extract_overview(overview)
+
+    def _get_html(self, force_reload):
+        """
+        Retrieves the HTML, checking if the file is already
+        available locally and abiding by whether or not a
+        refresh has been requested.
+
+        :return: The HTML data - str
+        """
         try:
             if force_reload:
                 raise FileNotFoundError
@@ -71,16 +89,16 @@ class Bill:
             with open(self._sources['html'], 'w+') as out_file:
                 out_file.write(html)
 
-        soup = BeautifulSoup(html, 'html.parser')
+        return html
 
-        self._title = next(soup.find('h1', attrs={'class': 'legDetail'}).strings)
-        try:
-            self._summary = soup.find('div', attrs={'id': 'bill-summary'}).find_all('p')[-1].text
-        except AttributeError:
-            # This seems to occur when a summary has not be generated yet
-            self._summary = None
+    def _extract_overview(self, overview):
+        """
+        Given a BeautifulSoup HTML overview extracted
+        from a webpage of a Bill, this function will extract
+        the available data
 
-        overview = soup.find('div', attrs={'class': 'overview'})
+        :param overview: The overview box - BeautifulSoup
+        """
         for i, tr in enumerate(overview.find_all('tr')):
             th = tr.find('th').text
             if th == 'Sponsor:':
