@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 
+from datetime import datetime
+
 from representative import Representative2
 
 
@@ -16,6 +18,14 @@ class Bill:
         self._sponsor = None
         self._committees = None
         self._committee_report = None
+
+        self._latest_action = None
+
+        self._num_rollcall_votes = 0
+
+        self._meetings = []
+
+        self._notes = None
 
         if url:
             self.load_from_url(url)
@@ -75,13 +85,33 @@ class Bill:
                     'report': a.text
                 }
             elif th == 'Latest Action:':
-                pass
+                # TODO: Do we want to handle the extra text?
+                self._latest_action = tr.find('td').text
             elif th == 'Roll Call Votes:':
-                pass
+                tds = list(tr.find('td').strings)
+                self._num_rollcall_votes = int(tds[-1].split(' ')[0])
             elif th == 'Committee Meetings:':
-                pass
+                for a in tr.find('td').find_all('a'):
+                    t = a.text
+                    if t == '(All Meetings)':
+                        continue
+
+                    check = int(t.split(' ')[-1].split(':')[0])
+                    if check < 10:
+                        chunks = t.split(' ')
+                        t = chunks[0] + ' 0' + chunks[1]
+
+                    self._meetings.append({
+                        'url': 'https://www.congress.gov' + a.get('href'),
+                        'datetime': datetime.strptime(t, '%m/%d/%y %I:%M%p')
+                    })
             elif th == 'Notes:':
-                pass
+                # TODO: Consider handling this differently
+                # Right now, this seems to not occur for many bills
+                # so it doesn't seem to relevant to write excessive code
+                # for handling what's contained here,
+                # other than grabbing the text
+                self._notes = tr.find('td').text
             else:
                 print('New Overview in Bill Identified!')
                 import pdb
