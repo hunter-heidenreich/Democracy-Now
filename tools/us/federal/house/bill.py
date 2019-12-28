@@ -15,6 +15,7 @@ class Bill:
 
         self._sponsor = None
         self._committees = None
+        self._committee_report = None
 
         if url:
             self.load_from_url(url)
@@ -68,7 +69,11 @@ class Bill:
                     committees = house.split('House - ')[-1].split(';')
                     self._committees = list(map(lambda s: s.strip(), committees))
             elif th == 'Committee Reports:':
-                pass
+                a = tr.find('td').find('a')
+                self._committee_report = {
+                    'url': 'https://www.congress.gov' + a.get('href'),
+                    'report': a.text
+                }
             elif th == 'Latest Action:':
                 pass
             elif th == 'Roll Call Votes:':
