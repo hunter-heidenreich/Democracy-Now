@@ -6,13 +6,28 @@ from datetime import datetime
 
 class Bill:
 
+    """
+    Representation of a a bill, as adapted
+    from the Congressional website.
+    While currently fitted for the Federal
+    House of Representatives in the USA
+    this format may very well fit Senate bills as well.
+    """
+
     ROOT_DIR = 'data/us/federal/house/bills/'
 
     def __init__(self, url=None, filename=None):
 
-        self._title = None
-        self._summary = None
+        self._title = None  # The title of the bill
+        self._summary = None  # A summary (if available)
 
+        # The location of data sources
+        # - url  -> original url scraped
+        # - html -> cached html on file system
+        # - json -> will link to JSON on file system
+        self._sources = {}
+
+        # Overview information available from the sources
         self._overview = {}
 
         if url:
@@ -29,16 +44,30 @@ class Bill:
             return self._title
 
     def load_from_url(self, url, force_reload=False):
+        """
+        Given a URL, this will generate the values
+        for the Bill from the HTML
+
+        :param url: The URL where the data can be found -- str
+        :param force_reload: When True, this will force a refresh of that HTML
+        """
         cache = url.split('://')[-1].replace('/', '_')
+
+        self._sources['url'] = url
+        self._sources['html'] = self.ROOT_DIR + 'web/' + cache
+
+        import pdb
+        pdb.set_trace()
+
         try:
             if force_reload:
                 raise FileNotFoundError
 
-            with open(self.ROOT_DIR + 'web/' + cache, 'r+') as in_file:
+            with open(self._sources['html'], 'r+') as in_file:
                 html = in_file.read()
         except FileNotFoundError:
             html = requests.get(url).text
-            with open(self.ROOT_DIR + 'web/' + cache, 'w+') as out_file:
+            with open(self._sources['html'], 'w+') as out_file:
                 out_file.write(html)
 
         soup = BeautifulSoup(html, 'html.parser')
@@ -115,5 +144,5 @@ if __name__ == '__main__':
     from tqdm import tqdm
 
     for f in tqdm(glob('data/us/federal/house/bills/web/*')):
-        short = f.split('/')[-1]
-        b = Bill(url=short)
+        url = 'https://' + f.split('/')[-1].replace('_', '/')
+        b = Bill(url=url)
