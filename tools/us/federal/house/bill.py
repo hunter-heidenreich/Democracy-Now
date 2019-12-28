@@ -15,6 +15,7 @@ class Bill:
     """
 
     ROOT_DIR = 'data/us/federal/house/bills/'
+    ROOT_URL = 'https://www.congress.gov'
 
     def __init__(self, url=None, filename=None):
 
@@ -85,7 +86,7 @@ class Bill:
             if th == 'Sponsor:':
                 a = tr.find('a')
                 self._overview['sponsor'] = {
-                    'url': 'https://www.congress.gov' + a.get('href'),
+                    'url': self.ROOT_URL + a.get('href'),
                     'name': a.text
                 }
             elif th == 'Committees:':
@@ -101,7 +102,7 @@ class Bill:
             elif th == 'Committee Reports:':
                 a = tr.find('td').find('a')
                 self._overview['committee_report'] = {
-                    'url': 'https://www.congress.gov' + a.get('href'),
+                    'url': self.ROOT_URL + a.get('href'),
                     'report': a.text
                 }
             elif th == 'Latest Action:':
@@ -123,7 +124,7 @@ class Bill:
                         t = chunks[0] + ' 0' + chunks[1]
 
                     self._overview['meetings'].append({
-                        'url': 'https://www.congress.gov' + a.get('href'),
+                        'url': self.ROOT_URL + a.get('href'),
                         'datetime': datetime.strptime(t, '%m/%d/%y %I:%M%p')
                     })
             elif th == 'Notes:':
