@@ -33,6 +33,9 @@ class Bill:
         # Overview information available from the sources
         self._overview = {}
 
+        # Progress of bill
+        self._bill_progress = {}
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -71,6 +74,9 @@ class Bill:
 
         overview = soup.find('div', attrs={'class': 'overview'})
         self._extract_overview(overview)
+
+        progress = soup.find('ol', attrs={'class': 'bill_progress'})
+        self._extract_bill_progress(progress)
 
         self.to_json()
 
@@ -166,6 +172,30 @@ class Bill:
                 import pdb
                 pdb.set_trace()
 
+    def _extract_bill_progress(self, progress):
+        """
+        Extracts the information contained in the HTML progress bar
+
+        :param progress: The HTML of the progress bar
+        """
+        # label to state
+        states = {
+            'passed': 1,
+            'selected': 0
+        }
+
+        for li in progress.find_all('li'):
+            text = next(li.strings)
+            classes = li.get('class')
+
+            if not classes:
+                classes = []
+
+            self._bill_progress[text] = -1
+            for c in classes:
+                if c in states:
+                    self._bill_progress[text] = states[c]
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -176,7 +206,8 @@ class Bill:
             'title': self._title,
             'summary': self._summary,
             'sources': self._sources,
-            'overview': self._overview
+            'overview': self._overview,
+            'progress': self._bill_progress
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -191,6 +222,7 @@ class Bill:
         self._summary = data['summary']
         self._sources = data['sources']
         self._overview = data['overview']
+        self._bill_progress = data['progress']
 
 
 if __name__ == '__main__':
