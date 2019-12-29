@@ -7,7 +7,6 @@ from datetime import datetime
 
 
 class Bill:
-
     """
     Representation of a a bill, as adapted
     from the Congressional website.
@@ -22,7 +21,6 @@ class Bill:
     def __init__(self, url=None, filename=None):
 
         self._title = None  # The title of the bill
-        self._summary = None  # A summary (if available)
 
         # The location of data sources
         # - url  -> original url scraped
@@ -44,10 +42,7 @@ class Bill:
             raise ValueError('ValueError: Unspecified bill source.')
 
     def __repr__(self):
-        if self._summary:
-            return '{} ({}...)'.format(self._title, self._summary[:50])
-        else:
-            return self._title
+        return self._title
 
     def load_from_url(self, url, force_reload=False):
         """
@@ -64,13 +59,8 @@ class Bill:
 
         soup = BeautifulSoup(self._get_html(force_reload), 'html.parser')
 
-        self._title = next(soup.find('h1', attrs={'class': 'legDetail'}).strings)
-
-        try:
-            self._summary = soup.find('div', attrs={'id': 'bill-summary'}).find_all('p')[-1].text
-        except AttributeError:
-            # This seems to occur when a summary has not be generated yet
-            self._summary = None
+        self._title = next(
+            soup.find('h1', attrs={'class': 'legDetail'}).strings)
 
         overview = soup.find('div', attrs={'class': 'overview'})
         self._extract_overview(overview)
@@ -204,7 +194,6 @@ class Bill:
 
         json.dump({
             'title': self._title,
-            'summary': self._summary,
             'sources': self._sources,
             'overview': self._overview,
             'progress': self._bill_progress
@@ -219,7 +208,6 @@ class Bill:
         """
         data = json.load(open(filename))
         self._title = data['title']
-        self._summary = data['summary']
         self._sources = data['sources']
         self._overview = data['overview']
         self._bill_progress = data['progress']
@@ -228,7 +216,11 @@ class Bill:
 if __name__ == '__main__':
     from glob import glob
     from tqdm import tqdm
+    import os
 
     for f in tqdm(glob('data/us/federal/house/bills/web/*')):
         url = 'https://' + f.split('/')[-1].replace('_', '/')
+        if 'all-info' not in url:
+            os.remove(f)
+            url += '/all-info'
         b = Bill(url=url)
