@@ -39,6 +39,8 @@ class Bill:
         self._action_overview = {}
         self._actions = {}
 
+        self._cosponsors = {}
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -83,6 +85,9 @@ class Bill:
 
         actions = soup.find('div', attrs={'id': 'allActions-content'})
         self._extract_actions(actions)
+
+        cos = soup.find('div', attrs={'id': 'cosponsors-content'})
+        self._extract_cosponsors(cos)
 
         self.to_json()
 
@@ -293,6 +298,26 @@ class Bill:
 
                 self._actions[dt] = action
 
+    def _extract_cosponsors(self, cos):
+        """
+        Extracts the cosponsor information
+
+        :param cos: The div of cosponsors
+        """
+
+        tb = cos.find('tbody')
+        if tb:
+            for tr in tb.find_all('tr'):
+                co, date = list(tr.find_all('td'))
+                date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
+                co_text = co.text.strip()
+                co = {
+                    'url': co.find('a').get('href'),
+                    'rep': co_text[:-1] if co_text[-1] == '*' else co_text,
+                    'original': co_text[-1] == '*'
+                }
+                self._cosponsors[date] = co
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -306,7 +331,8 @@ class Bill:
             'progress': self._bill_progress,
             'title_info': self._title_info,
             'action_overview': self._action_overview,
-            'actions': self._actions
+            'actions': self._actions,
+            'cosponsors': self._cosponsors
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -324,6 +350,7 @@ class Bill:
         self._title_info = data['title_info']
         self._action_overview = data['action_overview']
         self._actions = data['actions']
+        self._cosponsors = data['cosponsors']
 
 
 if __name__ == '__main__':
