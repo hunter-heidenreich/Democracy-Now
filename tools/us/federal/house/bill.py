@@ -34,6 +34,8 @@ class Bill:
         # Progress of bill
         self._bill_progress = {}
 
+        self._title_info = {}
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -69,6 +71,9 @@ class Bill:
 
         progress = soup.find('ol', attrs={'class': 'bill_progress'})
         self._extract_bill_progress(progress)
+
+        titles = soup.find('div', attrs={'id': 'titles-content'})
+        self._extract_title_info(titles)
 
         self.to_json()
 
@@ -188,6 +193,47 @@ class Bill:
                 if c in states:
                     self._bill_progress[text] = states[c]
 
+    def _extract_title_info(self, titles):
+
+        # Short title portion
+        self._title_info['short'] = {}
+        short = titles.find('div', attrs={'class': 'shortTitles'})
+        try:
+            t = None
+            for i, child in enumerate(short.children):
+                if i % 2 == 1:
+                    if i == 3:
+                        t = child.text
+                    elif i == 5:
+                        self._title_info['short'][t] = child.text
+        except AttributeError:
+            pass
+
+        sub = titles.find('div', attrs={'class': 'titles-row'})
+
+        hc = sub.find('div', attrs={'class': 'house-column'})
+        if hc:
+            h4s = list(hc.find_all('h4'))[1:]
+            self._title_info['short']['house'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+
+        sc = sub.find('div', attrs={'class': 'senate-column'})
+        if sc:
+            h4s = list(sc.find_all('h4'))[1:]
+            self._title_info['short']['senate'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+
+        self._title_info['official'] = {}
+        official = titles.find('div', attrs={'class': 'officialTitles'})
+
+        hc = official.find('div', attrs={'class': 'house-column'})
+        if hc:
+            h4s = list(hc.find_all('h4'))[1:]
+            self._title_info['official']['house'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+
+        sc = official.find('div', attrs={'class': 'senate-column'})
+        if sc:
+            h4s = list(sc.find_all('h4'))[1:]
+            self._title_info['official']['senate'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -198,7 +244,8 @@ class Bill:
             'title': self._title,
             'sources': self._sources,
             'overview': self._overview,
-            'progress': self._bill_progress
+            'progress': self._bill_progress,
+            'title_info': self._title_info
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -213,6 +260,7 @@ class Bill:
         self._sources = data['sources']
         self._overview = data['overview']
         self._bill_progress = data['progress']
+        self._title_info = data['title_info']
 
 
 if __name__ == '__main__':
