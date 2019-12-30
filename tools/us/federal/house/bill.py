@@ -49,6 +49,8 @@ class Bill:
 
         self._summary = ''
 
+        self._text = ''
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -106,8 +108,10 @@ class Bill:
         subs = soup.find('div', attrs={'id': 'subjects-content'})
         self._extract_subjects(subs)
 
-        sum = soup.find('div', attrs={'id': 'latestSummary-content'})
-        self._extract_summary(sum)
+        summ = soup.find('div', attrs={'id': 'latestSummary-content'})
+        self._extract_summary(summ)
+
+        self._extract_text()
 
         self.to_json()
 
@@ -493,6 +497,33 @@ class Bill:
         ps = div.find_all('p')
         self._summary = '\n'.join([p.text.strip() for p in ps])
 
+    def _extract_text(self, force_reload=False):
+        """
+        Extracts the text of a Bill
+        """
+        text_url = '/'.join(self._sources['url'].split('/')[:-1]) + '/text?format=txt'
+        text_html = text_url.split('://')[-1].replace('/', '_')
+
+        try:
+            if force_reload:
+                raise FileNotFoundError
+
+            with open(self.ROOT_DIR + 'web/' + text_html, 'r+') as in_file:
+                html = in_file.read()
+        except FileNotFoundError:
+            html = requests.get(text_url).text
+            with open(self.ROOT_DIR + 'web/' + text_html, 'w+') as out_file:
+                out_file.write(html)
+
+        soup = BeautifulSoup(html, 'html.parser')
+        container = soup.find('pre', attrs={'id': 'billTextContainer'})
+
+        try:
+            self._text = container.text.strip()
+        except AttributeError:
+            import pdb
+            pdb.set_trace()
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -511,7 +542,8 @@ class Bill:
             'committees': self._committees,
             'related_bills': self._related,
             'subjects': self._subjects,
-            'summary': self._summary
+            'summary': self._summary,
+            'text': self._text
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -534,16 +566,13 @@ class Bill:
         self._related = data['related_bills']
         self._subjects = data['subjects']
         self._summary = data['summary']
+        self._text = data['text']
 
 
 if __name__ == '__main__':
     from glob import glob
     from tqdm import tqdm
-    import os
 
-    for f in tqdm(glob('data/us/federal/house/bills/web/*')):
+    for f in tqdm(glob('data/us/federal/house/bills/web/*_all-info')):
         url = 'https://' + f.split('/')[-1].replace('_', '/')
-        if 'all-info' not in url:
-            os.remove(f)
-            url += '/all-info'
         b = Bill(url=url)
