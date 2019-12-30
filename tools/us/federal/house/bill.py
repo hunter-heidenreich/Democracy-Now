@@ -61,6 +61,8 @@ class Bill:
 
         self._title = next(
             soup.find('h1', attrs={'class': 'legDetail'}).strings)
+        self._title = self._title[34:]
+        self._title = self._title.split(' - ')[0]
 
         overview = soup.find('div', attrs={'class': 'overview'})
         self._extract_overview(overview)
