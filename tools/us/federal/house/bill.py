@@ -43,6 +43,8 @@ class Bill:
 
         self._committees = []
 
+        self._related = []
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -93,6 +95,9 @@ class Bill:
 
         com = soup.find('div', attrs={'id': 'committees-content'})
         self._extract_committees(com)
+
+        related = soup.find('table', attrs={'class': 'relatedBills'})
+        self._extract_related(related)
 
         self.to_json()
 
@@ -399,6 +404,50 @@ class Bill:
                     'report': rep
                 })
 
+    def _extract_related(self, table):
+        """
+        Extracts related bill data
+
+        :param table: The related table - BeautifulSoup
+        """
+        if table:
+            tb = table.find('tbody')
+            for tr in tb.find_all('tr'):
+                tds = list(tr.find_all('td'))
+                if len(tds) == 5:
+                    bill, title, rel, ident, act = list(tr.find_all('td'))
+                    self._related.append({
+                        'bill': {
+                            'title': bill.text.strip(),
+                            'url': bill.find('a').get('href')
+                        },
+                        'title': title.text,
+                        'relationship': rel.text,
+                        'identified': ident.text,
+                        'latest_action': act.text
+                    })
+                else:
+                    while tds:
+                        if tds[0].find('a'):
+                            # Process full 5
+                            bill, title, rel, ident, act = tds[:5]
+                            tds = tds[5:]
+                        else:
+                            # Process 2
+                            rel, ident = tds[:2]
+                            tds = tds[2:]
+
+                        self._related.append({
+                            'bill': {
+                                'title': bill.text,
+                                'url': bill.find('a').get('href')
+                            },
+                            'title': title.text,
+                            'relationship': rel.text,
+                            'identified': ident.text,
+                            'latest_action': act.text
+                        })
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -414,7 +463,8 @@ class Bill:
             'action_overview': self._action_overview,
             'actions': self._actions,
             'cosponsors': self._cosponsors,
-            'committees': self._committees
+            'committees': self._committees,
+            'related_bills': self._related
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -434,6 +484,7 @@ class Bill:
         self._actions = data['actions']
         self._cosponsors = data['cosponsors']
         self._committees = data['committees']
+        self._related = data['related_bills']
 
 
 if __name__ == '__main__':
