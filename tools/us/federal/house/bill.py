@@ -51,6 +51,8 @@ class Bill:
 
         self._text = ''
 
+        self._amendments = []
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -113,6 +115,8 @@ class Bill:
         self._extract_summary(summ)
 
         self._extract_text()
+
+        self._extract_amendments()
 
         self.to_json()
 
@@ -488,12 +492,67 @@ class Bill:
 
         soup = BeautifulSoup(html, 'html.parser')
         container = soup.find('pre', attrs={'id': 'billTextContainer'})
+        self._text = container.text.strip()
 
-        try:
-            self._text = container.text.strip()
-        except AttributeError:
-            import pdb
-            pdb.set_trace()
+    def _extract_amendments(self, force_reload=False):
+        """
+        Extract amendment data
+        :param force_reload: Whether or not to force a refresh
+        """
+        text_url = '/'.join(
+            self._sources['url'].split('/')[:-1]) + '/amendments'
+        text_html = self.ROOT_DIR + 'web/' + text_url.split('://')[-1].replace(
+            '/', '_')
+
+        html = download_file(text_url, text_html, force_reload)
+        soup = BeautifulSoup(html, 'html.parser')
+
+        main = soup.find('div', attrs={'id': 'main'})
+        ol = main.find('ol')
+
+        if ol:
+            for li in ol.find_all('li', attrs={'class': 'expanded'}):
+                amend = None
+                purpose = None
+                sponsor = None
+                latest_act = None
+                description = None
+                committees = None
+
+                for span in li.find_all('span'):
+                    if 'amendment-heading' in span.get('class'):
+                        amend = {
+                            'title': span.find('a').text,
+                            'url': self.ROOT_URL + span.find('a').get('href')
+                        }
+                    elif span.find('strong').text == 'Purpose:':
+                        purpose = list(span.strings)[1].strip()
+                    elif span.find('strong').text == 'Sponsor:':
+                        try:
+                            sponsor = {
+                                'name': span.find('a').text.strip(),
+                                'url': self.ROOT_URL + span.find('a').get('href')
+                            }
+                        except AttributeError:
+                            sponsor = {
+                                'name': list(span.strings)[1].strip(),
+                                'url': None
+                            }
+                    elif span.find('strong').text.strip() == 'Latest Action:':
+                        latest_act = span.text.strip()
+                    elif span.find('strong').text.strip() == 'Description:':
+                        description = list(span.strings)[1].strip()
+                    elif span.find('strong').text.strip() == 'Committees:':
+                        committees = list(span.strings)[2].strip()
+
+                self._amendments.append({
+                    'amendment': amend,
+                    'purpose': purpose,
+                    'sponsor': sponsor,
+                    'latest_action': latest_act,
+                    'description': description,
+                    'committees': committees
+                })
 
     def to_json(self):
         """
