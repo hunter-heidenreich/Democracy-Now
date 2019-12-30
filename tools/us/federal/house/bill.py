@@ -47,6 +47,8 @@ class Bill:
 
         self._subjects = {}
 
+        self._summary = ''
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -103,6 +105,9 @@ class Bill:
 
         subs = soup.find('div', attrs={'id': 'subjects-content'})
         self._extract_subjects(subs)
+
+        sum = soup.find('div', attrs={'id': 'latestSummary-content'})
+        self._extract_summary(sum)
 
         self.to_json()
 
@@ -478,6 +483,16 @@ class Bill:
                     'url': self.ROOT_URL + a.get('href')
                 })
 
+    def _extract_summary(self, div):
+        """
+        Extracts the summary of a bill
+
+        :param div: The div containing the summary - BeautifulSoup
+        """
+
+        ps = div.find_all('p')
+        self._summary = '\n'.join([p.text.strip() for p in ps])
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -495,7 +510,8 @@ class Bill:
             'cosponsors': self._cosponsors,
             'committees': self._committees,
             'related_bills': self._related,
-            'subjects': self._subjects
+            'subjects': self._subjects,
+            'summary': self._summary
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -517,6 +533,7 @@ class Bill:
         self._committees = data['committees']
         self._related = data['related_bills']
         self._subjects = data['subjects']
+        self._summary = data['summary']
 
 
 if __name__ == '__main__':
