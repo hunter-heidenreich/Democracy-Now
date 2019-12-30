@@ -34,12 +34,12 @@ class Bill:
         # Progress of bill
         self._bill_progress = {}
 
-        self._title_info = {}
+        self._title_info = []
 
-        self._action_overview = {}
-        self._actions = {}
+        self._action_overview = []
+        self._actions = []
 
-        self._cosponsors = {}
+        self._cosponsors = []
 
         if url:
             self.load_from_url(url)
@@ -215,7 +215,6 @@ class Bill:
         """
 
         # Short title portion
-        self._title_info['short'] = {}
         short = titles.find('div', attrs={'class': 'shortTitles'})
         try:
             t = None
@@ -224,7 +223,12 @@ class Bill:
                     if i == 3:
                         t = child.text
                     elif i == 5:
-                        self._title_info['short'][t] = child.text
+                        self._title_info.append({
+                            'type': 'short',
+                            'title': child.text,
+                            'location': t,
+                            'chamber': None
+                        })
         except AttributeError:
             pass
 
@@ -233,25 +237,48 @@ class Bill:
         hc = sub.find('div', attrs={'class': 'house-column'})
         if hc:
             h4s = list(hc.find_all('h4'))[1:]
-            self._title_info['short']['house'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+            for h4 in h4s:
+                self._title_info.append({
+                    'type': 'short',
+                    'title': h4.next_sibling.next_sibling.text.strip(),
+                    'location': h4.text,
+                    'chamber': 'House'
+                })
 
         sc = sub.find('div', attrs={'class': 'senate-column'})
         if sc:
             h4s = list(sc.find_all('h4'))[1:]
-            self._title_info['short']['senate'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+            for h4 in h4s:
+                self._title_info.append({
+                    'type': 'short',
+                    'title': h4.next_sibling.next_sibling.text.strip(),
+                    'location': h4.text,
+                    'chamber': 'Senate'
+                })
 
-        self._title_info['official'] = {}
         official = titles.find('div', attrs={'class': 'officialTitles'})
 
         hc = official.find('div', attrs={'class': 'house-column'})
         if hc:
             h4s = list(hc.find_all('h4'))[1:]
-            self._title_info['official']['house'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+            for h4 in h4s:
+                self._title_info.append({
+                    'type': 'official',
+                    'title': h4.next_sibling.next_sibling.text.strip(),
+                    'location': h4.text,
+                    'chamber': 'House'
+                })
 
         sc = official.find('div', attrs={'class': 'senate-column'})
         if sc:
             h4s = list(sc.find_all('h4'))[1:]
-            self._title_info['official']['senate'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
+            for h4 in h4s:
+                self._title_info.append({
+                    'type': 'official',
+                    'title': h4.next_sibling.next_sibling.text.strip(),
+                    'location': h4.text,
+                    'chamber': 'Senate'
+                })
 
     def _extract_action_overview(self, overview):
         """
@@ -263,7 +290,10 @@ class Bill:
             date = tr.find('td', attrs={'class': 'date'}).text
             date = datetime.strptime(date, '%m/%d/%Y').timestamp()
             action = tr.find('td', attrs={'class': 'actions'}).text
-            self._action_overview[date] = action
+            self._action_overview.append({
+                'date': date,
+                'action': action
+            })
 
     def _extract_actions(self, actions):
         """
@@ -292,11 +322,18 @@ class Bill:
                 chamber = tds[1].text
                 action = tds[2].text
 
-                self._actions[chamber] = (dt, action)
+                self._actions.append({
+                    'datetime': dt,
+                    'action': action,
+                    'chamber': chamber
+                })
             elif len(tds) == 2:
                 action = tds[1].text
 
-                self._actions[dt] = action
+                self._actions.append({
+                    'datetime': dt,
+                    'action': action
+                })
 
     def _extract_cosponsors(self, cos):
         """
@@ -316,7 +353,10 @@ class Bill:
                     'rep': co_text[:-1] if co_text[-1] == '*' else co_text,
                     'original': co_text[-1] == '*'
                 }
-                self._cosponsors[date] = co
+                self._cosponsors.append({
+                    'date': date,
+                    'cosponsors': co
+                })
 
     def to_json(self):
         """
