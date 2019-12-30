@@ -36,6 +36,8 @@ class Bill:
 
         self._title_info = {}
 
+        self._action_overview = {}
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -74,6 +76,9 @@ class Bill:
 
         titles = soup.find('div', attrs={'id': 'titles-content'})
         self._extract_title_info(titles)
+
+        act_overview = soup.find('div', attrs={'id': 'actionsOverview-content'})
+        self._extract_action_overview(act_overview)
 
         self.to_json()
 
@@ -194,6 +199,11 @@ class Bill:
                     self._bill_progress[text] = states[c]
 
     def _extract_title_info(self, titles):
+        """
+        Extracts all title information from a bill
+
+        :param titles: The div containing the title information
+        """
 
         # Short title portion
         self._title_info['short'] = {}
@@ -234,6 +244,18 @@ class Bill:
             h4s = list(sc.find_all('h4'))[1:]
             self._title_info['official']['senate'] = {h4.text: h4.next_sibling.next_sibling.text.strip() for h4 in h4s}
 
+    def _extract_action_overview(self, overview):
+        """
+        Extracts the overview of the actions taken on this bill
+
+        :param overview: The action overview div - BeautifulSoup
+        """
+        for tr in overview.find('tbody').find_all('tr'):
+            date = tr.find('td', attrs={'class': 'date'}).text
+            date = datetime.strptime(date, '%m/%d/%Y').timestamp()
+            action = tr.find('td', attrs={'class': 'actions'}).text
+            self._action_overview[date] = action
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -245,7 +267,8 @@ class Bill:
             'sources': self._sources,
             'overview': self._overview,
             'progress': self._bill_progress,
-            'title_info': self._title_info
+            'title_info': self._title_info,
+            'action_overview': self._action_overview
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -261,6 +284,7 @@ class Bill:
         self._overview = data['overview']
         self._bill_progress = data['progress']
         self._title_info = data['title_info']
+        self._action_overview = data['action_overview']
 
 
 if __name__ == '__main__':
