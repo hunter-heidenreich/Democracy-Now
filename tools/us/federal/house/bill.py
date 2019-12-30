@@ -37,6 +37,7 @@ class Bill:
         self._title_info = {}
 
         self._action_overview = {}
+        self._actions = {}
 
         if url:
             self.load_from_url(url)
@@ -79,6 +80,9 @@ class Bill:
 
         act_overview = soup.find('div', attrs={'id': 'actionsOverview-content'})
         self._extract_action_overview(act_overview)
+
+        actions = soup.find('div', attrs={'id': 'allActions-content'})
+        self._extract_actions(actions)
 
         self.to_json()
 
@@ -256,6 +260,39 @@ class Bill:
             action = tr.find('td', attrs={'class': 'actions'}).text
             self._action_overview[date] = action
 
+    def _extract_actions(self, actions):
+        """
+        Extracts the full list of actions on a bill
+
+        :param actions: The div containing the actions - BeautifulSoup
+        """
+        for tr in actions.find('tbody').find_all('tr'):
+            tds = list(tr.find_all('td'))
+
+            dt = tds[0].text.split('-')
+            date = dt[0]
+            if len(dt) > 1:
+                time = dt[1]
+                hr, mint = time.split(':')
+                if int(hr) < 10:
+                    hr = '0' + hr
+                time = hr + ':' + mint
+            else:
+                time = None
+            dt = date + '-' + time if time else date
+            code = '%m/%d/%Y-%I:%M%p' if time else '%m/%d/%Y'
+            dt = datetime.strptime(dt, code).timestamp()
+
+            if len(tds) == 3:
+                chamber = tds[1].text
+                action = tds[2].text
+
+                self._actions[chamber] = (dt, action)
+            elif len(tds) == 2:
+                action = tds[1].text
+
+                self._actions[dt] = action
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -268,7 +305,8 @@ class Bill:
             'overview': self._overview,
             'progress': self._bill_progress,
             'title_info': self._title_info,
-            'action_overview': self._action_overview
+            'action_overview': self._action_overview,
+            'actions': self._actions
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -285,6 +323,7 @@ class Bill:
         self._bill_progress = data['progress']
         self._title_info = data['title_info']
         self._action_overview = data['action_overview']
+        self._actions = data['actions']
 
 
 if __name__ == '__main__':
