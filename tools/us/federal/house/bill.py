@@ -41,6 +41,8 @@ class Bill:
 
         self._cosponsors = []
 
+        self._committees = []
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -88,6 +90,9 @@ class Bill:
 
         cos = soup.find('div', attrs={'id': 'cosponsors-content'})
         self._extract_cosponsors(cos)
+
+        com = soup.find('div', attrs={'id': 'committees-content'})
+        self._extract_committees(com)
 
         self.to_json()
 
@@ -358,6 +363,42 @@ class Bill:
                     'cosponsors': co
                 })
 
+    def _extract_committees(self, com):
+        """
+        Extracts the committee information
+
+        :param com: The div of committees
+        """
+
+        tb = com.find('tbody')
+        if tb:
+            sub = None
+            com = None
+            for tr in tb.find_all('tr'):
+                cls = tr.get('class')
+                cs = tr.find('th')
+                if cls and 'committee' in cls:
+                    com = cs.text
+                    sub = None
+                elif cls and 'subcommittee' in cls:
+                    sub = cs.text
+
+                date, act, rep = list(tr.find_all('td'))
+                date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
+
+                rep = {
+                    'url': self.ROOT_URL + rep.find('a').get('href'),
+                    'title': rep.text
+                } if rep.text and rep else None
+
+                self._committees.append({
+                    'subcommittee': sub,
+                    'committee': com,
+                    'datetime': date,
+                    'action': act.text.strip(),
+                    'report': rep
+                })
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -372,7 +413,8 @@ class Bill:
             'title_info': self._title_info,
             'action_overview': self._action_overview,
             'actions': self._actions,
-            'cosponsors': self._cosponsors
+            'cosponsors': self._cosponsors,
+            'committees': self._committees
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -391,6 +433,7 @@ class Bill:
         self._action_overview = data['action_overview']
         self._actions = data['actions']
         self._cosponsors = data['cosponsors']
+        self._committees = data['committees']
 
 
 if __name__ == '__main__':

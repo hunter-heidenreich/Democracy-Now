@@ -36,5 +36,5 @@ so that they aren't forgotten:
 - Better way of handling sessions and house in total
 - Probably want a tool to initiate and seed downloads, 
 with some user control via the command line.
-- Saving URLs and filenames within objects for ease of updating 
-information if user requests a refresh  
+- Scraping reports from committees
+- Linking between JSONs (e.g. representatives who sponsor)
