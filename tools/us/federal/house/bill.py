@@ -1,9 +1,9 @@
 import json
+from datetime import datetime
 
-import requests
 from bs4 import BeautifulSoup
 
-from datetime import datetime
+from utils import download_file
 
 
 class Bill:
@@ -74,7 +74,8 @@ class Bill:
         self._sources['url'] = url
         self._sources['html'] = self.ROOT_DIR + 'web/' + cache
 
-        soup = BeautifulSoup(self._get_html(force_reload), 'html.parser')
+        data = download_file(self._sources['url'], self._sources['html'], force_reload)
+        soup = BeautifulSoup(data, 'html.parser')
 
         self._title = next(
             soup.find('h1', attrs={'class': 'legDetail'}).strings)
@@ -114,27 +115,6 @@ class Bill:
         self._extract_text()
 
         self.to_json()
-
-    def _get_html(self, force_reload):
-        """
-        Retrieves the HTML, checking if the file is already
-        available locally and abiding by whether or not a
-        refresh has been requested.
-
-        :return: The HTML data - str
-        """
-        try:
-            if force_reload:
-                raise FileNotFoundError
-
-            with open(self._sources['html'], 'r+') as in_file:
-                html = in_file.read()
-        except FileNotFoundError:
-            html = requests.get(url).text
-            with open(self._sources['html'], 'w+') as out_file:
-                out_file.write(html)
-
-        return html
 
     def _extract_overview(self, overview):
         """
@@ -502,18 +482,9 @@ class Bill:
         Extracts the text of a Bill
         """
         text_url = '/'.join(self._sources['url'].split('/')[:-1]) + '/text?format=txt'
-        text_html = text_url.split('://')[-1].replace('/', '_')
+        text_html = self.ROOT_DIR + 'web/' + text_url.split('://')[-1].replace('/', '_')
 
-        try:
-            if force_reload:
-                raise FileNotFoundError
-
-            with open(self.ROOT_DIR + 'web/' + text_html, 'r+') as in_file:
-                html = in_file.read()
-        except FileNotFoundError:
-            html = requests.get(text_url).text
-            with open(self.ROOT_DIR + 'web/' + text_html, 'w+') as out_file:
-                out_file.write(html)
+        html = download_file(text_url, text_html, force_reload)
 
         soup = BeautifulSoup(html, 'html.parser')
         container = soup.find('pre', attrs={'id': 'billTextContainer'})

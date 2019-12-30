@@ -3,8 +3,9 @@ import calendar
 import json
 from collections import defaultdict
 
-import requests
 from bs4 import BeautifulSoup
+
+from utils import download_file
 
 
 class Vote:
@@ -54,7 +55,8 @@ class Vote:
         self._sources['url'] = url
         self._sources['xml'] = self.ROOT_DIR + 'web/' + cache
 
-        soup = BeautifulSoup(self._get_xml(force_reload), 'xml')
+        xml = download_file(self._sources['url'], self._sources['xml'], force_reload)
+        soup = BeautifulSoup(xml, 'xml')
 
         self._extract_congressional_info(soup)
         self._extract_basic_vote(soup)
@@ -63,27 +65,6 @@ class Vote:
         self._extract_votes(soup)
 
         self.to_json()
-
-    def _get_xml(self, force_reload):
-        """
-        Retrieves the XML, checking if the file is already
-        available locally and abiding by whether or not a
-        refresh has been requested.
-
-        :return: The XML data - str
-        """
-        try:
-            if force_reload:
-                raise FileNotFoundError
-
-            with open(self._sources['xml'], 'r+') as in_file:
-                xml = in_file.read()
-        except FileNotFoundError:
-            xml = requests.get(self._sources['url']).text
-            with open(self._sources['xml'], 'w+') as out_file:
-                out_file.write(xml)
-
-        return xml
 
     def _extract_congressional_info(self, soup):
         """
