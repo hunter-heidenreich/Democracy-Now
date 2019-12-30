@@ -45,6 +45,8 @@ class Bill:
 
         self._related = []
 
+        self._subjects = {}
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -98,6 +100,9 @@ class Bill:
 
         related = soup.find('table', attrs={'class': 'relatedBills'})
         self._extract_related(related)
+
+        subs = soup.find('div', attrs={'id': 'subjects-content'})
+        self._extract_subjects(subs)
 
         self.to_json()
 
@@ -448,6 +453,31 @@ class Bill:
                             'latest_action': act.text
                         })
 
+    def _extract_subjects(self, div):
+        """
+        Extracts subject data
+
+        :param div: The subject div - BeautifulSoup
+        """
+        nav = div.find('div', attrs={'class': 'search-column-nav'})
+        if nav:
+            uls = nav.find('ul')
+            if uls:
+                hrefs = list(uls.find_all('a'))
+                self._subjects['main'] = {
+                    'title': hrefs[0].text.strip(),
+                    'url': hrefs[0].get('href')
+                }
+
+        others = div.find('div', attrs={'class': 'search-column-main'})
+        if others:
+            self._subjects['others'] = []
+            for a in others.find_all('a'):
+                self._subjects['others'].append({
+                    'title': a.text.strip(),
+                    'url': self.ROOT_URL + a.get('href')
+                })
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -464,7 +494,8 @@ class Bill:
             'actions': self._actions,
             'cosponsors': self._cosponsors,
             'committees': self._committees,
-            'related_bills': self._related
+            'related_bills': self._related,
+            'subjects': self._subjects
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -485,6 +516,7 @@ class Bill:
         self._cosponsors = data['cosponsors']
         self._committees = data['committees']
         self._related = data['related_bills']
+        self._subjects = data['subjects']
 
 
 if __name__ == '__main__':
