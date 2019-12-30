@@ -31,10 +31,11 @@ More to come soon once noteworthy progress has been made!
 This is where I'm placing items that still need to be done 
 so that they aren't forgotten:
 
-- Extracting information from bill tabs (instead of just overview)
 - Transition repo fully to new representative objects 
 - Better way of handling sessions and house in total
 - Probably want a tool to initiate and seed downloads, 
 with some user control via the command line.
 - Scraping reports from committees
 - Linking between JSONs (e.g. representatives who sponsor)
+- Extracting bill cost estimates (seems to be dynamically loaded on
+click)

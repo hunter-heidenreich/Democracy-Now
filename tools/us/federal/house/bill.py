@@ -53,6 +53,8 @@ class Bill:
 
         self._amendments = []
 
+        self._cost_estimates = []
+
         if url:
             self.load_from_url(url)
         elif filename:
@@ -117,6 +119,9 @@ class Bill:
         self._extract_text()
 
         self._extract_amendments()
+
+        costs = soup.find('div', attrs={'id': 'cboEstimate'})
+        self._extract_cost(costs)
 
         self.to_json()
 
@@ -554,6 +559,14 @@ class Bill:
                     'committees': committees
                 })
 
+    def _extract_cost(self, div):
+        """
+        Extract cost estimates
+
+        :param div: The div that should contain this information
+        """
+        pass
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
@@ -573,7 +586,9 @@ class Bill:
             'related_bills': self._related,
             'subjects': self._subjects,
             'summary': self._summary,
-            'text': self._text
+            'text': self._text,
+            'amendments': self._amendments,
+            'cost': self._cost_estimates
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -597,6 +612,8 @@ class Bill:
         self._subjects = data['subjects']
         self._summary = data['summary']
         self._text = data['text']
+        self._amendments = data['amendments']
+        self._cost_estimates = data['cost']
 
 
 if __name__ == '__main__':
