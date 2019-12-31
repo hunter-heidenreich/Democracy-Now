@@ -37,7 +37,16 @@ class Representative:
         soup = BeautifulSoup(data, 'html.parser')
 
         details = soup.find('h1', attrs={'class': 'legDetail'})
+        self._extract_basics(details)
 
+        self.to_json()
+
+    def _extract_basics(self, details):
+        """
+        Extracts basic details
+
+        :param details: BeautifulSoup details
+        """
         fullname = next(details.strings).split()
         self._basics['title'] = fullname[0]
         self._basics['name'] = ' '.join(fullname[1:])
@@ -52,8 +61,6 @@ class Representative:
         spans = list(details.children)
         last = spans[-1]
         self._basics['in congress'] = next(last.strings)
-
-        self.to_json()
 
     def to_json(self):
         """
