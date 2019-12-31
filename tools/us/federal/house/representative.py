@@ -38,7 +38,9 @@ class Representative:
 
         details = soup.find('h1', attrs={'class': 'legDetail'})
 
-        self._basics['name'] = next(details.strings)
+        fullname = next(details.strings).split()
+        self._basics['title'] = fullname[0]
+        self._basics['name'] = ' '.join(fullname[1:])
 
         sp = details.find('span', attrs={'class': 'birthdate'}).text.strip()
         self._basics['birth'] = int(sp[1:5])
