@@ -39,6 +39,9 @@ class Representative:
         details = soup.find('h1', attrs={'class': 'legDetail'})
         self._extract_basics(details)
 
+        prof = soup.find('div', attrs={'class': 'overview-member-column-profile member_profile'})
+        self._extract_overview(prof)
+
         self.to_json()
 
     def _extract_basics(self, details):
@@ -61,6 +64,48 @@ class Representative:
         spans = list(details.children)
         last = spans[-1]
         self._basics['in congress'] = next(last.strings)
+
+    def _extract_overview(self, prof):
+        """
+        Extracts the overview
+
+        :param prof: The div containing the overview profile
+        """
+        pos, info = list(prof.find_all('table'))
+
+        # Extract position information
+        labels = [th.text.strip() for th in pos.find_all('th')]
+        body = pos.find('tbody')
+
+        self._overview['positions'] = []
+        for tr in body.find_all('tr'):
+            p = {}
+            for lab, td in zip(labels, tr.find_all('td')):
+                p[lab] = td.text.strip()
+            self._overview['positions'].append(p)
+
+        # Extract other info
+        self._overview['info'] = {}
+        for tr in info.find_all('tr'):
+            th = tr.find('th').text.strip()
+            td = tr.find('td')
+
+            if th == 'Website':
+                self._overview['info']['website'] = td.find('a').get('href')
+            elif th == 'Party':
+                self._overview['info']['party'] = td.text.strip()
+            elif th == 'Contact':
+                self._overview['info']['contact'] = [
+                    s.strip() for s in td.strings
+                ]
+            elif th == 'Party History  in Congress':
+                self._overview['info']['party history'] = [
+                    s.strip() for s in td.strings
+                ]
+            else:
+                print('New Info!')
+                import pdb
+                pdb.set_trace()
 
     def to_json(self):
         """
