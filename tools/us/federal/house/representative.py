@@ -49,6 +49,10 @@ class Representative:
         except ValueError:
             self._basics['death'] = None
 
+        spans = list(details.children)
+        last = spans[-1]
+        self._basics['in congress'] = next(last.strings)
+
         self.to_json()
 
     def to_json(self):
