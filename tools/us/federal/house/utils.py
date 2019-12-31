@@ -45,3 +45,13 @@ def get_representative_urls():
             urls.add(co['cosponsors']['url'])
 
     return urls
+
+
+def get_jsons(path, pattern='json/*.json'):
+    """
+    Given a path, extracts all the JSON files
+    :param path: The path to the JSONs
+    :param pattern: The pattern to glob
+    :return: The list of JSON paths
+    """
+    return list(glob(path + pattern))
