@@ -9,7 +9,7 @@ from utils import download_file, get_representative_urls
 class Representative:
     ROOT_DIR = 'data/us/federal/house/reps/'
 
-    def __init__(self, url=''):
+    def __init__(self, url='', filename=''):
         # The location of data sources
         # - url  -> original url scraped
         # - html -> cached html on file system
@@ -22,7 +22,10 @@ class Representative:
         # Overview panel
         self._overview = {}
 
-        self.load(url)
+        if url:
+            self.load(url)
+        elif filename:
+            self.from_json(filename)
 
     def __repr__(self):
         return self._basics['name']

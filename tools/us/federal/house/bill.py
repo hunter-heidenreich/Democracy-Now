@@ -58,7 +58,7 @@ class Bill:
         if url:
             self.load_from_url(url)
         elif filename:
-            pass
+            self.from_json(filename)
         else:
             raise ValueError('ValueError: Unspecified bill source.')
 
