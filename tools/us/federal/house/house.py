@@ -1,3 +1,7 @@
+from collections import defaultdict
+
+from pprint import pprint
+
 from session import Session
 from bill import Bill
 from representative import Representative
@@ -21,10 +25,21 @@ class USHouse:
         self._bills = []
         self._votes = []
 
+        # Search {object} by {property}
+        self._search_by = defaultdict(lambda: defaultdict(dict))
+
     def get_floor(self, floor='HDoc-116-1-FloorProceedings.xml'):
+        """
+        Retrieves a congressional XML file
+
+        :param floor: The name of the file
+        """
         self._sessions.append(Session(source=floor))
 
     def read_files(self):
+        """
+        Reads JSON paths of Reps, Bills, and Votes
+        """
         rep_paths = get_jsons(Representative.ROOT_DIR)
         self._reps = [Representative(filename=p) for p in rep_paths]
 
@@ -34,11 +49,50 @@ class USHouse:
         vote_paths = get_jsons(Vote.ROOT_DIR)
         self._votes = [Vote(filename=p) for p in vote_paths]
 
-        import pdb
-        pdb.set_trace()
+    def generate_search_by(self):
+        """
+        Generates the dictionary to search for a given class
+        of object by their URL
+        """
+        # Representative lookup
+        self._search_by['rep']['party'] = defaultdict(list)
+        self._search_by['rep']['state'] = defaultdict(list)
+
+        for rep in self._reps:
+            self._search_by['rep']['url'][rep.get_sources()['url']] = rep
+            self._search_by['rep']['party'][rep.get_current_party()].append(rep)
+
+            pos = rep.get_states()
+            for p in pos:
+                self._search_by['rep']['state'][p].append(rep)
+
+        self._search_by['bill']['sponsor url'] = defaultdict(list)
+        for bill in self._bills:
+            self._search_by['bill']['sponsor url'][bill.get_overview()['sponsor']['url']].append(bill)
+
+    def count_bills_by(self, show=False):
+        bills_by = defaultdict(lambda: defaultdict(int))
+
+        # Bills by Party
+        for r, bs in self._search_by['bill']['sponsor url'].items():
+            party = self._search_by['rep']['url'][r].get_current_party()
+            bills_by['party'][party] += len(bs)
+
+        # Bills by State
+        for r, bs in self._search_by['bill']['sponsor url'].items():
+            states = self._search_by['rep']['url'][r].get_states()
+
+            for s in states:
+                bills_by['state'][s] += len(bs)
+
+        if show:
+            pprint(bills_by)
+        else:
+            return bills_by
 
 
 if __name__ == '__main__':
     house = USHouse()
-    # house.get_floor()
     house.read_files()
+    house.generate_search_by()
+    house.count_bills_by(show=True)

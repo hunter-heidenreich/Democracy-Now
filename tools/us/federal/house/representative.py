@@ -2,6 +2,7 @@ import json
 
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+from pprint import pprint
 
 from utils import download_file, get_representative_urls
 
@@ -134,6 +135,42 @@ class Representative:
         self._sources = data['sources']
         self._basics = data['basics']
         self._overview = data['overview']
+
+    def get_sources(self):
+        return self._sources
+
+    def get_overview(self):
+        return self._overview
+
+    def get_current_party(self):
+        """
+        Gets the current party affiliation of a representative
+        """
+        if 'party' in self._overview['info']:
+            return self._overview['info']['party']
+        elif 'party history' in self._overview['info']:
+            for text in self._overview['info']['party history']:
+                pa, time = text.split()
+                if 'Present' in time:
+                    return pa
+            return None
+        else:
+            import pdb
+            pdb.set_trace()
+
+    def get_states(self):
+        """
+        Returns a list of the states that a representative has served in
+        """
+        return list(set([p['State'] for p in self._overview['positions']]))
+
+    def print(self):
+        """
+        Pretty prints the representative
+        """
+        pprint(self._basics)
+        pprint(self._sources)
+        pprint(self._overview)
 
 
 if __name__ == '__main__':

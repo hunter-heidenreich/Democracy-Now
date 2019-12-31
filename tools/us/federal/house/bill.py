@@ -615,6 +615,9 @@ class Bill:
         self._amendments = data['amendments']
         self._cost_estimates = data['cost']
 
+    def get_overview(self):
+        return self._overview
+
 
 if __name__ == '__main__':
     from glob import glob
