@@ -1,3 +1,8 @@
+import json
+from glob import glob
+
+from tqdm import tqdm
+
 import requests
 
 
@@ -24,3 +29,19 @@ def download_file(url, file, force_reload=False):
             out_file.write(data)
 
     return data
+
+
+def get_representative_urls():
+    """
+    Gets the URLs of all the representatives
+
+    :return: The URLs - set
+    """
+    urls = set()
+    for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
+        data = json.load(open(f))
+        urls.add(data['overview']['sponsor']['url'])
+        for co in data['cosponsors']:
+            urls.add(co['cosponsors']['url'])
+
+    return urls
