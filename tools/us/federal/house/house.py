@@ -85,6 +85,10 @@ class USHouse:
             for s in states:
                 bills_by['state'][s] += len(bs)
 
+        # Bills by Progress
+        for bill in self._bills:
+            bills_by['progress'][bill.get_progress()] += 1
+
         if show:
             pprint(bills_by)
         else:

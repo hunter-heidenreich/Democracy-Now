@@ -618,6 +618,14 @@ class Bill:
     def get_overview(self):
         return self._overview
 
+    def get_progress(self):
+        """
+        Gets the current progress of the bill
+        """
+        for k, v in self._bill_progress.items():
+            if v == 0:
+                return k
+
 
 if __name__ == '__main__':
     from glob import glob
