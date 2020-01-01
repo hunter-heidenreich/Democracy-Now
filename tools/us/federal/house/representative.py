@@ -174,5 +174,6 @@ class Representative:
 
 
 if __name__ == '__main__':
-    for url in tqdm(get_representative_urls()):
-        Representative(url)
+    new, old = get_representative_urls()
+    for url in tqdm(new):
+        Representative(url=url)

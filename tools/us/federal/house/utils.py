@@ -36,16 +36,22 @@ def get_representative_urls():
     Gets the URLs of all the representatives
     from the data already generated
 
-    :return: The URLs - set
+    :return: Two sets of URLs, un-downloaded and downloaded
     """
-    urls = set()
+    old_urls = set()
+    for f in tqdm(glob('data/us/federal/house/reps/json/*.json')):
+        data = json.load(open(f))
+        old_urls.add(data['sources']['url'])
+
+    new_urls = set()
     for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
         data = json.load(open(f))
-        urls.add(data['overview']['sponsor']['url'])
+        new_urls.add(data['overview']['sponsor']['url'])
         for co in data['cosponsors']:
-            urls.add(co['cosponsors']['url'])
+            new_urls.add(co['cosponsors']['url'])
 
-    return urls
+    new_urls -= old_urls
+    return new_urls, old_urls
 
 
 def get_bill_urls():
@@ -53,23 +59,26 @@ def get_bill_urls():
     Gets the URLs for all the bills
     from the already generated data
 
-    :return: The URLs - set
+    :return: Two sets of URLs, un-downloaded and downloaded
     """
-    urls = set()
+    new_urls = set()
+    old_urls = set()
     for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
         data = json.load(open(f))
 
         if 'all-info' not in data['sources']['url']:
-            urls.add(data['sources']['url'] + '/all-info')
+            old_urls.add(data['sources']['url'] + '/all-info')
         else:
-            urls.add(data['sources']['url'])
+            old_urls.add(data['sources']['url'])
         if data['related_bills']:
             for b in data['related_bills']:
                 if 'all-info' not in b:
-                    urls.add(b['bill']['url'] + '/all-info')
+                    new_urls.add(b['bill']['url'] + '/all-info')
                 else:
-                    urls.add(b['bill']['url'])
-    return urls
+                    new_urls.add(b['bill']['url'])
+
+    new_urls -= old_urls
+    return new_urls, old_urls
 
 
 def get_jsons(path, pattern='json/*.json'):

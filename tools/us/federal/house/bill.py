@@ -652,8 +652,8 @@ class Bill:
 
 if __name__ == '__main__':
     from tqdm import tqdm
-
-    for f in tqdm(get_bill_urls()):
+    new, old = get_bill_urls()
+    for f in tqdm(new):
         try:
             Bill(url=f)
         except AttributeError:
