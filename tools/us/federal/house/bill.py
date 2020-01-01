@@ -4,7 +4,7 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-from utils import download_file
+from utils import download_file, get_bill_urls
 
 
 class Bill:
@@ -651,9 +651,11 @@ class Bill:
 
 
 if __name__ == '__main__':
-    from glob import glob
     from tqdm import tqdm
 
-    for f in tqdm(glob('data/us/federal/house/bills/web/*_all-info')):
-        url = 'https://' + f.split('/')[-1].replace('_', '/')
-        b = Bill(url=url)
+    for f in tqdm(get_bill_urls()):
+        try:
+            Bill(url=f)
+        except AttributeError:
+            import pdb
+            pdb.set_trace()

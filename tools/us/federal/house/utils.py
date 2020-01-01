@@ -34,6 +34,7 @@ def download_file(url, file, force_reload=False):
 def get_representative_urls():
     """
     Gets the URLs of all the representatives
+    from the data already generated
 
     :return: The URLs - set
     """
@@ -44,6 +45,30 @@ def get_representative_urls():
         for co in data['cosponsors']:
             urls.add(co['cosponsors']['url'])
 
+    return urls
+
+
+def get_bill_urls():
+    """
+    Gets the URLs for all the bills
+    from the already generated data
+
+    :return: The URLs - set
+    """
+    urls = set()
+    for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
+        data = json.load(open(f))
+
+        if 'all-info' not in data['sources']['url']:
+            urls.add(data['sources']['url'] + '/all-info')
+        else:
+            urls.add(data['sources']['url'])
+        if data['related_bills']:
+            for b in data['related_bills']:
+                if 'all-info' not in b:
+                    urls.add(b['bill']['url'] + '/all-info')
+                else:
+                    urls.add(b['bill']['url'])
     return urls
 
 
