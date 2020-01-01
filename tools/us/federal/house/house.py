@@ -98,6 +98,10 @@ class USHouse:
             for sub in subjects['others']:
                 bills_by['subject - all'][sub['title']] += 1
 
+        # Bills by Congress
+        for bill in self._bills:
+            bills_by['congress'][bill.get_congress()] += 1
+
         if show:
             pprint(bills_by)
         else:

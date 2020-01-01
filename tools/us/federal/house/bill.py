@@ -1,3 +1,4 @@
+import re
 import json
 from datetime import datetime
 
@@ -21,6 +22,7 @@ class Bill:
     def __init__(self, url=None, filename=None):
 
         self._title = None  # The title of the bill
+        self._congress = None  # The congressional session
 
         # The location of data sources
         # - url  -> original url scraped
@@ -85,6 +87,11 @@ class Bill:
             soup.find('h1', attrs={'class': 'legDetail'}).strings)
         self._title = self._title[34:]
         self._title = self._title.split(' - ')[0]
+
+        span = soup.find('h1', attrs={'class': 'legDetail'}).find('span')
+        timing = next(span.strings)
+        if re.search('\d{3}', timing):
+            self._congress = int(re.search('\d{3}', timing).group())
 
         overview = soup.find('div', attrs={'class': 'overview'})
         self._extract_overview(overview)
@@ -575,6 +582,7 @@ class Bill:
 
         json.dump({
             'title': self._title,
+            'congress': self._congress,
             'sources': self._sources,
             'overview': self._overview,
             'progress': self._bill_progress,
@@ -600,6 +608,7 @@ class Bill:
         """
         data = json.load(open(filename))
         self._title = data['title']
+        self._congress = data['congress']
         self._sources = data['sources']
         self._overview = data['overview']
         self._bill_progress = data['progress']
@@ -628,6 +637,16 @@ class Bill:
 
     def get_subjects(self):
         return self._subjects
+
+    def get_congress(self):
+        return self._congress
+
+    def __hash__(self):
+        try:
+            hash(self._sources['url'])
+        except KeyError:
+            return 0
+
 
 if __name__ == '__main__':
     from glob import glob
