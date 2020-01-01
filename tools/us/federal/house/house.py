@@ -34,7 +34,7 @@ class USHouse:
 
         :param floor: The name of the file
         """
-        self._sessions.append(Session(url=floor, force_reload=True))
+        self._sessions.append(Session(url=floor))
 
     def read_files(self):
         """

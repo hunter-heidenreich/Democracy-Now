@@ -72,10 +72,23 @@ def get_bill_urls():
             old_urls.add(data['sources']['url'])
         if data['related_bills']:
             for b in data['related_bills']:
-                if 'all-info' not in b:
+                if 'all-info' not in b['bill']['url']:
                     new_urls.add(b['bill']['url'] + '/all-info')
                 else:
                     new_urls.add(b['bill']['url'])
+
+    for f in tqdm(glob('data/us/federal/house/session/json/*.json')):
+        data = json.load(open(f))
+
+        for act in data['activities']:
+            for fl in act['floor_actions']:
+                if fl['item']:
+                    if fl['item']['type'] == 'bill':
+                        b = fl['item']['link']
+                        if 'all-info' not in b:
+                            new_urls.add(b + '/all-info')
+                        else:
+                            new_urls.add(b)
 
     new_urls -= old_urls
     return new_urls, old_urls
