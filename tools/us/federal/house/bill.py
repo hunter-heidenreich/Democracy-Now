@@ -626,6 +626,8 @@ class Bill:
             if v == 0:
                 return k
 
+    def get_subjects(self):
+        return self._subjects
 
 if __name__ == '__main__':
     from glob import glob

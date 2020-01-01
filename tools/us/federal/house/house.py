@@ -89,6 +89,15 @@ class USHouse:
         for bill in self._bills:
             bills_by['progress'][bill.get_progress()] += 1
 
+        # Bills by Subject
+        for bill in self._bills:
+            subjects = bill.get_subjects()
+            if 'main' in subjects:
+                bills_by['subject - main'][subjects['main']['title']] += 1
+                bills_by['subject - all'][subjects['main']['title']] += 1
+            for sub in subjects['others']:
+                bills_by['subject - all'][sub['title']] += 1
+
         if show:
             pprint(bills_by)
         else:
