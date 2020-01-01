@@ -117,8 +117,13 @@ class USHouse:
 
 
 if __name__ == '__main__':
+    congresses = list(range(109, 117))
+    sessions = list(range(1, 3))
+    floors = ['HDoc-{}-{}-FloorProceedings.xml'.format(congress, sess) for congress in congresses for sess in sessions]
+
     house = USHouse()
-    house.get_floor()
+    for floor in floors:
+        house.get_floor(floor=floor)
     # house.read_files()
     # house.generate_search_by()
     # cnts = house.count_bills_by()
