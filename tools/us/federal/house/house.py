@@ -34,7 +34,7 @@ class USHouse:
 
         :param floor: The name of the file
         """
-        self._sessions.append(Session(source=floor))
+        self._sessions.append(Session(url=floor, force_reload=True))
 
     def read_files(self):
         """
@@ -118,9 +118,10 @@ class USHouse:
 
 if __name__ == '__main__':
     house = USHouse()
-    house.read_files()
-    house.generate_search_by()
-    cnts = house.count_bills_by()
+    house.get_floor()
+    # house.read_files()
+    # house.generate_search_by()
+    # cnts = house.count_bills_by()
 
     import pdb
     pdb.set_trace()
