@@ -102,6 +102,16 @@ class USHouse:
         for bill in self._bills:
             bills_by['congress'][bill.get_congress()] += 1
 
+        # Bills by chamber
+        for bill in self._bills:
+            title = bill.get_overview()['sponsor']['title']
+            if title == 'Rep.':
+                title = 'House'
+            elif title == 'Sen.':
+                title = 'Senate'
+
+            bills_by['chamber'][title] += 1
+
         if show:
             pprint(bills_by)
         else:

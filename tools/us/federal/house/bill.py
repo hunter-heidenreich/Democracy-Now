@@ -144,9 +144,11 @@ class Bill:
             th = tr.find('th').text
             if th == 'Sponsor:':
                 a = tr.find('a')
+                text = a.text.strip().split()
                 self._overview['sponsor'] = {
                     'url': self.ROOT_URL + a.get('href'),
-                    'name': a.text
+                    'name': ' '.join(text[1:]),
+                    'title': text[0]
                 }
             elif th == 'Committees:':
                 td = tr.find('td').text
