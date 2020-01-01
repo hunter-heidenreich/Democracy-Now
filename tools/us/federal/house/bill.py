@@ -645,7 +645,7 @@ class Bill:
 
     def __hash__(self):
         try:
-            hash(self._sources['url'])
+            return hash(self._sources['url'])
         except KeyError:
             return 0
 

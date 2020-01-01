@@ -55,20 +55,20 @@ class USHouse:
         of object by their URL
         """
         # Representative lookup
-        self._search_by['rep']['party'] = defaultdict(list)
-        self._search_by['rep']['state'] = defaultdict(list)
+        self._search_by['rep']['party'] = defaultdict(set)
+        self._search_by['rep']['state'] = defaultdict(set)
 
         for rep in self._reps:
             self._search_by['rep']['url'][rep.get_sources()['url']] = rep
-            self._search_by['rep']['party'][rep.get_current_party()].append(rep)
+            self._search_by['rep']['party'][rep.get_current_party()].add(rep)
 
             pos = rep.get_states()
             for p in pos:
-                self._search_by['rep']['state'][p].append(rep)
+                self._search_by['rep']['state'][p].add(rep)
 
-        self._search_by['bill']['sponsor url'] = defaultdict(list)
+        self._search_by['bill']['sponsor url'] = defaultdict(set)
         for bill in self._bills:
-            self._search_by['bill']['sponsor url'][bill.get_overview()['sponsor']['url']].append(bill)
+            self._search_by['bill']['sponsor url'][bill.get_overview()['sponsor']['url']].add(bill)
 
     def count_bills_by(self, show=False):
         bills_by = defaultdict(lambda: defaultdict(int))
