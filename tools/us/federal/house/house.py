@@ -28,13 +28,15 @@ class USHouse:
         # Search {object} by {property}
         self._search_by = defaultdict(lambda: defaultdict(dict))
 
-    def get_floor(self, floor='HDoc-116-1-FloorProceedings.xml'):
+    def get_floor(self, floor='HDoc-116-1-FloorProceedings.xml',
+                  force_reload=True):
         """
         Retrieves a congressional XML file
 
         :param floor: The name of the file
+        :param force_reload: Whether or not to refresh the file
         """
-        self._sessions.append(Session(url=floor))
+        self._sessions.append(Session(url=floor, force_reload=force_reload))
 
     def read_files(self):
         """
@@ -122,8 +124,9 @@ if __name__ == '__main__':
     floors = ['HDoc-{}-{}-FloorProceedings.xml'.format(congress, sess) for congress in congresses for sess in sessions]
 
     house = USHouse()
-    # for floor in floors:
-    #     house.get_floor(floor=floor)
+    for floor in floors[:-1]:
+        house.get_floor(floor=floor)
+    house.get_floor(floor=floors[-1], force_reload=True)
     house.read_files()
     house.generate_search_by()
     cnts = house.count_bills_by()
