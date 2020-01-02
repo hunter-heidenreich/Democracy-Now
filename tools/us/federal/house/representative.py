@@ -1,3 +1,4 @@
+import re
 import json
 
 from bs4 import BeautifulSoup
@@ -86,6 +87,32 @@ class Representative:
             p = {}
             for lab, td in zip(labels, tr.find_all('td')):
                 p[lab] = td.text.strip()
+
+            # Handle extracting total congressional position timing
+            text = p['In Congress']
+            chamber, rest = text.split(': ')
+            cong, years = rest.split()
+
+            congs = list(map(lambda s: int(s[:-2]),
+                             re.findall('\d*[a-z]{2}', cong)))
+
+            years = years[1:-1]
+            try:
+                start, end = years.split('-')
+            except ValueError:
+                start = years
+                end = years
+
+            d = {
+                'chamber': chamber,
+                'start': int(start),
+                'end': None if 'Present' == end else int(end),
+                'congresses': list(range(congs[0], congs[1] + 1)) if len(
+                    congs) == 2 else [congs[0]]
+            }
+
+            p['In Congress'] = d
+
             self._overview['positions'].append(p)
 
         # Extract other info
@@ -171,6 +198,33 @@ class Representative:
         pprint(self._basics)
         pprint(self._sources)
         pprint(self._overview)
+
+    def search(self, key, value):
+        """
+        Given a key/property and an intended value,
+        returns True if this rep has the intended value
+        :param key: A string property
+        :param value: The value searched for
+        :return: True or False if this rep is part of the search
+        """
+
+        if key == 'source':
+            return value in self._sources.values()
+        elif key == 'name':
+            return value == self._basics['name']
+        elif key == 'chamber':
+            if value == 'House':
+                return self._basics['title'] == 'Representative'
+            elif value == 'Senate':
+                return self._basics['title'] == 'Senator'
+        elif key == 'alive':
+            return not self._basics['death'] == value
+        elif key == 'party':
+            return value == self.get_current_party()
+        else:
+            print('Unknown property for representative. Returning False')
+
+        return False
 
 
 if __name__ == '__main__':
