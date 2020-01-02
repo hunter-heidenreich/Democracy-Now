@@ -57,6 +57,10 @@ class USHouse:
                 self._search_by[group][key][value] = \
                     set(filter(lambda r: r.search(key, value), self._reps))
                 return self._search_by[group][key][value]
+            elif group == 'bills':
+                self._search_by[group][key][value] = \
+                    set(filter(lambda r: r.search(key, value), self._bills))
+                return self._search_by[group][key][value]
             else:
                 print('Invalid search group: {}'.format(group))
 

@@ -680,6 +680,26 @@ class Bill:
         except KeyError:
             return 0
 
+    def search(self, key, value):
+        """
+        Given a key/property and an intended value,
+        returns True if this bill has the intended value
+        :param key: A string property
+        :param value: The value searched for
+        :return: True or False if this rep is part of the search
+        """
+
+        if key == 'source':
+            return value in self._sources.values()
+        elif key == 'title':
+            return value == self._title
+        elif key == 'congress':
+            return value == self._congress
+        else:
+            print('Unknown property for bill. Returning False')
+
+        return False
+
 
 if __name__ == '__main__':
     from tqdm import tqdm
