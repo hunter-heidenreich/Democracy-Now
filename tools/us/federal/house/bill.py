@@ -166,7 +166,7 @@ class Bill:
                     'url': self.ROOT_URL + a.get('href'),
                     'report': a.text
                 }
-            elif th == 'Latest Action:':
+            elif th == 'Latest Action:' or th == 'Latest Action (modified):':
                 temp = tr.find('td').text.strip()
                 temp = temp.split('\xa0')[0].strip()
                 temp = temp.split('(TXT | PDF)')[0].strip()
@@ -367,18 +367,45 @@ class Bill:
         tb = cos.find('tbody')
         if tb:
             for tr in tb.find_all('tr'):
-                co, date = list(tr.find_all('td'))
-                date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
-                co_text = co.text.strip()
-                co = {
-                    'url': co.find('a').get('href'),
-                    'rep': co_text[:-1] if co_text[-1] == '*' else co_text,
-                    'original': co_text[-1] == '*'
-                }
-                self._cosponsors.append({
-                    'date': date,
-                    'cosponsors': co
-                })
+                try:
+                    co, date = list(tr.find_all('td'))
+                    date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
+                    co_text = co.text.strip()
+                    co = {
+                        'url': co.find('a').get('href'),
+                        'rep': co_text[:-1] if co_text[-1] == '*' else co_text,
+                        'original': co_text[-1] == '*'
+                    }
+                    self._cosponsors.append({
+                        'date': date,
+                        'cosponsors': co
+                    })
+                except ValueError:
+                    if 'withdrawnTbody' == tb.get('id'):
+                        co, date1, date2, exp = list(tr.find_all('td'))
+
+                        date1 = datetime.strptime(date1.text,
+                                                  '%m/%d/%Y').timestamp()
+                        date2 = datetime.strptime(date2.text,
+                                                  '%m/%d/%Y').timestamp()
+                        co_text = co.text.strip()
+                        exp_text = exp.text.strip()
+
+                        co = {
+                            'url': 'https://www.congress.gov' + co.find('a').get('href'),
+                            'rep': co_text[:-1] if co_text[
+                                                       -1] == '*' else co_text
+                        }
+
+                        self._cosponsors.append({
+                            'date': date1,
+                            'date withdrawn': date2,
+                            'cosponsors': co,
+                            'explanation': exp_text
+                        })
+                    else:
+                        import pdb
+                        pdb.set_trace()
 
     def _extract_committees(self, com):
         """
@@ -401,7 +428,10 @@ class Bill:
                     sub = cs.text
 
                 date, act, rep = list(tr.find_all('td'))
-                date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
+                if date.text.strip():
+                    date = datetime.strptime(date.text, '%m/%d/%Y').timestamp()
+                else:
+                    date = None
 
                 rep = {
                     'url': self.ROOT_URL + rep.find('a').get('href'),
@@ -580,7 +610,8 @@ class Bill:
         """
         Dumps the Bill to a JSON readable format
         """
-        filename = self._title.split(' - ')[0] + '.json'
+        filename = '{}_{}.json'.format(self._congress,
+                                       self._title.split(' - ')[0])
 
         json.dump({
             'title': self._title,

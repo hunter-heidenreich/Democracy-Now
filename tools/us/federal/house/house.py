@@ -77,7 +77,7 @@ class USHouse:
 
         for bill in self._bills:
             self._search_by['bill']['sponsor url'][bill.get_overview()['sponsor']['url']].add(bill)
-            self._search_by['bill']['sponsor'][self._search_by['rep']['url'][bill.get_overview()['sponsor']['url']]].add(bill)
+            # self._search_by['bill']['sponsor'][self._search_by['rep']['url'][bill.get_overview()['sponsor']['url']]].add(bill)
             self._search_by['bill']['progress'][bill.get_progress()].add(bill)
             self._search_by['bill']['congress'][bill.get_congress()].add(bill)
 
@@ -122,11 +122,11 @@ if __name__ == '__main__':
     floors = ['HDoc-{}-{}-FloorProceedings.xml'.format(congress, sess) for congress in congresses for sess in sessions]
 
     house = USHouse()
-    for floor in floors:
-        house.get_floor(floor=floor)
-    # house.read_files()
-    # house.generate_search_by()
-    # cnts = house.count_bills_by()
+    # for floor in floors:
+    #     house.get_floor(floor=floor)
+    house.read_files()
+    house.generate_search_by()
+    cnts = house.count_bills_by()
 
     import pdb
     pdb.set_trace()

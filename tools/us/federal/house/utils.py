@@ -48,7 +48,8 @@ def get_representative_urls():
         data = json.load(open(f))
         new_urls.add(data['overview']['sponsor']['url'])
         for co in data['cosponsors']:
-            new_urls.add(co['cosponsors']['url'])
+            if 'congress.gov' not in co['cosponsors']['url']:
+                new_urls.add('https://www.congress.gov' + co['cosponsors']['url'])
 
     new_urls -= old_urls
     return new_urls, old_urls
@@ -85,10 +86,11 @@ def get_bill_urls():
                 if fl['item']:
                     if fl['item']['type'] == 'bill':
                         b = fl['item']['link']
-                        if 'all-info' not in b:
-                            new_urls.add(b + '/all-info')
-                        else:
-                            new_urls.add(b)
+                        if 'congress.gov' in b:
+                            if 'all-info' not in b:
+                                new_urls.add(b + '/all-info')
+                            else:
+                                new_urls.add(b)
 
     new_urls -= old_urls
     return new_urls, old_urls
