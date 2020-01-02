@@ -1,7 +1,5 @@
 from collections import defaultdict
 
-from pprint import pprint
-
 from session import Session
 from bill import Bill
 from representative import Representative

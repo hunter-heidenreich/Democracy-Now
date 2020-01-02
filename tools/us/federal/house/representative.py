@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from pprint import pprint
 
+import us
+import pylcs
+
 from utils import download_file, get_representative_urls
 
 
@@ -227,7 +230,11 @@ class Representative:
         if key == 'source':
             return value in self._sources.values()
         elif key == 'name':
-            return value == self._basics['name']
+            v = value.lower()
+            v = ''.join([let for let in v if 'a' <= let <= 'z'])
+            name = self._basics['name'].lower()
+            lcs = pylcs.lcs(v, name)
+            return lcs == len(v)
         elif key == 'chamber':
             if value == 'House':
                 return self._basics['title'] == 'Representative'
@@ -238,9 +245,11 @@ class Representative:
         elif key == 'party':
             return value == self.get_current_party()
         elif key == 'state':
-            return value == self.get_state()
+            state = us.states.lookup(value).name
+            return state == self.get_state()
         elif key == 'district':
             state, dist = value
+            state = us.states.lookup(state).name
             return state == self.get_state() and dist == self.get_district()
         else:
             print('Unknown property for representative. Returning False')
