@@ -185,11 +185,27 @@ class Representative:
             import pdb
             pdb.set_trace()
 
-    def get_states(self):
+    def get_state(self):
         """
-        Returns a list of the states that a representative has served in
+        Returns the current state serving in
         """
-        return list(set([p['State'] for p in self._overview['positions']]))
+        for p in self._overview['positions']:
+            if not p['In Congress']['end']:
+                return p['State']
+        return None
+
+    def get_district(self):
+        """
+        Returns the current district serving in
+        """
+        for p in self._overview['positions']:
+            if not p['In Congress']['end']:
+                try:
+                    return p['District']
+                except KeyError:
+                    import pdb
+                    pdb.set_trace()
+        return None
 
     def print(self):
         """
@@ -221,6 +237,11 @@ class Representative:
             return not self._basics['death'] == value
         elif key == 'party':
             return value == self.get_current_party()
+        elif key == 'state':
+            return value == self.get_state()
+        elif key == 'district':
+            state, dist = value
+            return state == self.get_state() and dist == self.get_district()
         else:
             print('Unknown property for representative. Returning False')
 
