@@ -77,6 +77,9 @@ class USHouse:
                 if key == 'sponsor':
                     self._search_by[group][key][value] = \
                         self.search('bills', 'sponsor url', value)
+                elif key == 'cosponsor':
+                    self._search_by[group][key][value] = \
+                        self.search('bills', 'cosponsor url', value)
                 else:
                     self._search_by[group][key][value] = \
                         set(filter(lambda r: r.search(key, value), self._reps))

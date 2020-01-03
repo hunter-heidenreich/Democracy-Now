@@ -715,6 +715,8 @@ class Bill:
             return value == self._congress
         elif key == 'sponsor url':
             return value == self._overview['sponsor']['url']
+        elif key == 'cosponsor url':
+            return value in [co['cosponsors']['url'] for co in self._cosponsors]
         else:
             print('Unknown property for bill. Returning False')
 
