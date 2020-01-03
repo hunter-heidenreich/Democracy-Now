@@ -509,16 +509,16 @@ class Bill:
             uls = nav.find('ul')
             if uls:
                 hrefs = list(uls.find_all('a'))
-                self._subjects['main'] = {
+                self.subjects['main'] = {
                     'title': hrefs[0].text.strip(),
                     'url': hrefs[0].get('href')
                 }
 
         others = div.find('div', attrs={'class': 'search-column-main'})
         if others:
-            self._subjects['others'] = []
+            self.subjects['others'] = []
             for a in others.find_all('a'):
-                self._subjects['others'].append({
+                self.subjects['others'].append({
                     'title': a.text.strip(),
                     'url': self.ROOT_URL + a.get('href')
                 })
@@ -684,13 +684,14 @@ class Bill:
                 return k
 
     def get_subjects(self):
-        return self._subjects
+        return self.subjects
 
     def get_congress(self):
         return self._congress
 
     def get_introduced_date(self):
-        return '{}'.format(datetime.fromtimestamp(self.get_overview()['sponsor']['date']))
+        intro = datetime.fromtimestamp(self.get_overview()['sponsor']['date'])
+        return '{}/{}/{}'.format(intro.month, intro.day, intro.year)
     
     def __hash__(self):
         try:

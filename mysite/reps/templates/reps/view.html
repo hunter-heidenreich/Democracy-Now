@@ -5,16 +5,41 @@
 
 <div class="container">
     {% if rep %}
-    <div class="row">
+    <div class="row" style="padding: 3vw 0vw">
         <div class="col">
             <div class="text-center">
-                <img src="{{ rep.sources.img }}" alt="{{rep.basics.name}}"/>
-                <h1 class="h1">{{ rep.basics.name }}</h1>
-                <h4 class="h4">Age: {{ rep.get_age }} (Status: {% if rep.basics.death %}Deceased{% else %}Alive{% endif %})</h4>
-                <h4 class="h4">Party: {{ rep.get_current_party }}</h4>
-                <h4 class="h4">Position: {{ rep.get_state }}-{{ rep.get_district }}</h4>
-                <h4 class="h4">Years Served: {{ rep.get_service }}</h4>
+                <img src="{{ rep.sources.img }}" alt="{{rep.basics.name}}" class="rounded"/>
             </div>
+        </div>
+        <div class="col">
+            <h1 class="h1">{{ rep.basics.name }}</h1>
+            <table>
+                <tbody>
+                <tr>
+                    <th>Age:</th>
+                    <td style="float: right;">
+                        {{ rep.get_age }}
+                        {% if rep.basics.death %}
+                        <small class="alert-danger">(Status: Deceased)</small>
+                        {% else %}
+                        <small class="alert-success">(Status: Alive)</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Party:</th>
+                    <td style="float: right;"> {{ rep.get_current_party }} </td>
+                </tr>
+                <tr>
+                    <th>Position:</th>
+                    <td style="float: right;">{{ rep.get_state }}-{{ rep.get_district }}</td>
+                </tr>
+                <tr>
+                    <th>Years Served:</th>
+                    <td style="float: right;">{{ rep.get_service }}</td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     {% else %}
@@ -49,6 +74,7 @@
             <p>No sponsored bills this session.</p>
             {% endif %}
         </div>
+        <!--
         <div class="col">
             <h5 class="h5">Bills cosponsored this session:</h5>
             {% if cosponsor %}
@@ -76,5 +102,6 @@
             <p>No cosponsored bills this session.</p>
             {% endif %}
         </div>
+        -->
     </div>
 </div>
