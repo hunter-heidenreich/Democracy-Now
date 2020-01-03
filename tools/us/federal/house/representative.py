@@ -213,6 +213,16 @@ class Representative:
                     return None
         return None
 
+    def get_active(self):
+        """
+        Returns true if active
+        """
+        for p in self.overview['positions']:
+            if not p['In Congress']['end']:
+                return True
+
+        return False
+
     def print(self):
         """
         Pretty prints the representative
@@ -254,6 +264,8 @@ class Representative:
             state, dist = value
             state = us.states.lookup(state).name
             return state == self.get_state() and dist == self.get_district()
+        elif key == 'active':
+            return value == self.get_active()
         else:
             print('Unknown property for representative. Returning False')
 

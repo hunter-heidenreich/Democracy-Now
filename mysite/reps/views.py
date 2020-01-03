@@ -20,6 +20,12 @@ class IndexView(ListView):
     def get_queryset(self):
         reps = set(house._reps)
 
+        active = self.request.GET.get('active')
+        if active:
+            reps &= house.search('reps', 'active', bool(active))
+        else:
+            reps &= house.search('reps', 'active', True)
+
         name = self.request.GET.get('name')
         if name:
             reps &= house.search('reps', 'name', name)
