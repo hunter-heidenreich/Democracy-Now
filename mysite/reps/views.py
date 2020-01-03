@@ -45,15 +45,6 @@ class IndexView(ListView):
         return reps
 
 
-def index(request):
-    reps = house._reps
-    template = loader.get_template('reps/index.html')
-    context = {
-        'rep_list': reps,
-    }
-    return HttpResponse(template.render(context, request))
-
-
 def view(request, name):
     rep = house.search('reps', 'name', name).pop()
     template = loader.get_template('reps/view.html')
