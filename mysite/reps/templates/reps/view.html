@@ -59,7 +59,7 @@
                     <th>Title</th>
                     <th>Introduced</th>
                     <th>Subject</th>
-                    <th>Summary</th>
+                    <!--<th>Summary</th>-->
                     <th>Progress</th>
                 </thead>
                 <tbody>
@@ -68,7 +68,7 @@
                         <td>{{ bill.title }}</td>
                         <td>{{ bill.get_introduced_date }}</td>
                         <td>{{ bill.subjects.main.title }}</td>
-                        <td>{{ bill.summary }}</td>
+                        <!--<td>{{ bill.summary }}</td>-->
                         <td>{{ bill.get_progress }}</td>
                     </tr>
                     {% endfor %}
