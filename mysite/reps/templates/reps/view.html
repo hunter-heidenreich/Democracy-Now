@@ -1,0 +1,22 @@
+{% if rep %}
+    <table>
+        <thead>
+            <th>Title</th>
+            <th>Name</th>
+            <th>Party</th>
+            <th>State</th>
+            <th>District</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ rep.basics.title }}</td>
+                <td>{{ rep.basics.name }}</td>
+                <td>{{ rep.get_current_party }}</td>
+                <td>{{ rep.get_state }}</td>
+                <td>{{ rep.get_district }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% else %}
+    <p>Rep not found.</p>
+{% endif %}

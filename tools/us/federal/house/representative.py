@@ -19,13 +19,13 @@ class Representative:
         # - url  -> original url scraped
         # - html -> cached html on file system
         # - json -> will link to JSON on file system
-        self._sources = {}
+        self.sources = {}
 
         # Basics
-        self._basics = {}
+        self.basics = {}
 
         # Overview panel
-        self._overview = {}
+        self.overview = {}
 
         if url:
             self.load(url)
@@ -33,45 +33,49 @@ class Representative:
             self.from_json(filename)
 
     def __repr__(self):
-        return self._basics['name']
+        return '{} {} - {} ({}-{})'.format(self.basics['title'],
+                                           self.basics['name'],
+                                           self.get_current_party(),
+                                           self.get_state(),
+                                           self.get_district())
 
     def load(self, url, force_reload=False):
         cache = url.split('://')[-1].replace('/', '_')
-        self._sources['url'] = url
-        self._sources['html'] = self.ROOT_DIR + 'web/' + cache
+        self.sources['url'] = url
+        self.sources['html'] = self.ROOT_DIR + 'web/' + cache
 
-        data = download_file(self._sources['url'], self._sources['html'],
+        data = download_file(self.sources['url'], self.sources['html'],
                              force_reload)
         soup = BeautifulSoup(data, 'html.parser')
 
         details = soup.find('h1', attrs={'class': 'legDetail'})
-        self._extract_basics(details)
+        self._extractbasics(details)
 
         prof = soup.find('div', attrs={'class': 'overview-member-column-profile member_profile'})
         self._extract_overview(prof)
 
         self.to_json()
 
-    def _extract_basics(self, details):
+    def _extractbasics(self, details):
         """
         Extracts basic details
 
         :param details: BeautifulSoup details
         """
         fullname = next(details.strings).split()
-        self._basics['title'] = fullname[0]
-        self._basics['name'] = ' '.join(fullname[1:])
+        self.basics['title'] = fullname[0]
+        self.basics['name'] = ' '.join(fullname[1:])
 
         sp = details.find('span', attrs={'class': 'birthdate'}).text.strip()
-        self._basics['birth'] = int(sp[1:5])
+        self.basics['birth'] = int(sp[1:5])
         try:
-            self._basics['death'] = int(sp[8:12])
+            self.basics['death'] = int(sp[8:12])
         except ValueError:
-            self._basics['death'] = None
+            self.basics['death'] = None
 
         spans = list(details.children)
         last = spans[-1]
-        self._basics['in congress'] = next(last.strings)
+        self.basics['in congress'] = next(last.strings)
 
     def _extract_overview(self, prof):
         """
@@ -85,7 +89,7 @@ class Representative:
         labels = [th.text.strip() for th in pos.find_all('th')]
         body = pos.find('tbody')
 
-        self._overview['positions'] = []
+        self.overview['positions'] = []
         for tr in body.find_all('tr'):
             p = {}
             for lab, td in zip(labels, tr.find_all('td')):
@@ -116,24 +120,24 @@ class Representative:
 
             p['In Congress'] = d
 
-            self._overview['positions'].append(p)
+            self.overview['positions'].append(p)
 
         # Extract other info
-        self._overview['info'] = {}
+        self.overview['info'] = {}
         for tr in info.find_all('tr'):
             th = tr.find('th').text.strip()
             td = tr.find('td')
 
             if th == 'Website':
-                self._overview['info']['website'] = td.find('a').get('href')
+                self.overview['info']['website'] = td.find('a').get('href')
             elif th == 'Party':
-                self._overview['info']['party'] = td.text.strip()
+                self.overview['info']['party'] = td.text.strip()
             elif th == 'Contact':
-                self._overview['info']['contact'] = [
+                self.overview['info']['contact'] = [
                     s.strip() for s in td.strings
                 ]
             elif th == 'Party History  in Congress':
-                self._overview['info']['party history'] = [
+                self.overview['info']['party history'] = [
                     s.strip() for s in td.strings
                 ]
             else:
@@ -145,12 +149,12 @@ class Representative:
         """
         Dumps the Representative to a JSON readable format
         """
-        filename = '{}.json'.format(self._basics['name'])
-        self._sources['json'] = self.ROOT_DIR + 'json/' + filename
+        filename = '{}.json'.format(self.basics['name'])
+        self.sources['json'] = self.ROOT_DIR + 'json/' + filename
         json.dump({
-            'sources': self._sources,
-            'basics': self._basics,
-            'overview': self._overview
+            'sources': self.sources,
+            'basics': self.basics,
+            'overview': self.overview
         }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
@@ -162,24 +166,24 @@ class Representative:
         """
         data = json.load(open(filename))
 
-        self._sources = data['sources']
-        self._basics = data['basics']
-        self._overview = data['overview']
+        self.sources = data['sources']
+        self.basics = data['basics']
+        self.overview = data['overview']
 
     def get_sources(self):
-        return self._sources
+        return self.sources
 
     def get_overview(self):
-        return self._overview
+        return self.overview
 
     def get_current_party(self):
         """
         Gets the current party affiliation of a representative
         """
-        if 'party' in self._overview['info']:
-            return self._overview['info']['party']
-        elif 'party history' in self._overview['info']:
-            for text in self._overview['info']['party history']:
+        if 'party' in self.overview['info']:
+            return self.overview['info']['party']
+        elif 'party history' in self.overview['info']:
+            for text in self.overview['info']['party history']:
                 pa, time = text.split()
                 if 'Present' in time:
                     return pa
@@ -192,7 +196,7 @@ class Representative:
         """
         Returns the current state serving in
         """
-        for p in self._overview['positions']:
+        for p in self.overview['positions']:
             if not p['In Congress']['end']:
                 return p['State']
         return None
@@ -201,22 +205,21 @@ class Representative:
         """
         Returns the current district serving in
         """
-        for p in self._overview['positions']:
+        for p in self.overview['positions']:
             if not p['In Congress']['end']:
                 try:
                     return p['District']
                 except KeyError:
-                    import pdb
-                    pdb.set_trace()
+                    return None
         return None
 
     def print(self):
         """
         Pretty prints the representative
         """
-        pprint(self._basics)
-        pprint(self._sources)
-        pprint(self._overview)
+        pprint(self.basics)
+        pprint(self.sources)
+        pprint(self.overview)
 
     def search(self, key, value):
         """
@@ -228,20 +231,20 @@ class Representative:
         """
 
         if key == 'source':
-            return value in self._sources.values()
+            return value in self.sources.values()
         elif key == 'name':
             v = value.lower()
             v = ''.join([let for let in v if 'a' <= let <= 'z'])
-            name = self._basics['name'].lower()
+            name = self.basics['name'].lower()
             lcs = pylcs.lcs(v, name)
             return lcs == len(v)
         elif key == 'chamber':
             if value == 'House':
-                return self._basics['title'] == 'Representative'
+                return self.basics['title'] == 'Representative'
             elif value == 'Senate':
-                return self._basics['title'] == 'Senator'
+                return self.basics['title'] == 'Senator'
         elif key == 'alive':
-            return not self._basics['death'] == value
+            return not self.basics['death'] == value
         elif key == 'party':
             return value == self.get_current_party()
         elif key == 'state':

@@ -1,0 +1,24 @@
+{% if rep_list %}
+    <table>
+        <thead>
+            <th>Title</th>
+            <th>Name</th>
+            <th>Party</th>
+            <th>State</th>
+            <th>District</th>
+        </thead>
+        <tbody>
+         {% for rep in rep_list %}
+            <tr>
+                <td>{{ rep.basics.title }}</td>
+                <td>{{ rep.basics.name }}</td>
+                <td>{{ rep.get_current_party }}</td>
+                <td>{{ rep.get_state }}</td>
+                <td>{{ rep.get_district }}</td>
+            </tr>
+         {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No representatives are available.</p>
+{% endif %}
