@@ -10,9 +10,10 @@
     <div class="row">
         <div class="col">
             <form action="{% url 'index' %}" method="get">
-                <label for="nameInput">Name</label>
+                <label for="nameInput">Name:</label>
                 <input id="nameInput" class="form-control" name="name" type="text" placeholder="Search...">
-                <div class="form-check form-check-inline">
+                <label for="chamberSelect">Chamber:</label>
+                <div class="form-check form-check-inline" id="chamberSelect">
                   <input class="form-check-input" type="radio" name="chamberOpt" id="inlineRadio1" value="Both" checked>
                   <label class="form-check-label" for="inlineRadio1">Both</label>
                 </div>
@@ -24,6 +25,77 @@
                   <input class="form-check-input" type="radio" name="chamberOpt" id="inlineRadio3" value="Senate">
                   <label class="form-check-label" for="inlineRadio3">Senate</label>
                 </div>
+                <br />
+                <label for="partySelect">Party:</label>
+                <select class="form-control" name="party" id="partySelect">
+                    <option>All</option>
+                    <option>Democratic</option>
+                    <option>Republican</option>
+                    <option>Independent</option>
+                </select>
+                <label for="stateSelect">State:</label>
+                <select class="form-control" name="state" id="stateSelect">
+                    <option>All</option>
+                    <option>Alabama</option>
+                    <option>Alaska</option>
+                    <option>American Samoa</option>
+                    <option>Arizona</option>
+                    <option>Arkansas</option>
+                    <option>California</option>
+                    <option>Colorado</option>
+                    <option>Connecticut</option>
+                    <option>Dakota</option>
+                    <option>Delaware</option>
+                    <option>District of Columbia</option>
+                    <option>Florida</option>
+                    <option>Georgia</option>
+                    <option>Guam</option>
+                    <option>Hawaii</option>
+                    <option>Idaho</option>
+                    <option>Illinois</option>
+                    <option>Indiana</option>
+                    <option>Iowa</option>
+                    <option>Kansas</option>
+                    <option>Kentucky</option>
+                    <option>Louisiana</option>
+                    <option>Maine</option>
+                    <option>Maryland</option>
+                    <option>Massachusetts</option>
+                    <option>Michigan</option>
+                    <option>Minnesota</option>
+                    <option>Mississippi</option>
+                    <option>Missouri</option>
+                    <option>Montana</option>
+                    <option>Nebraska</option>
+                    <option>Nevada</option>
+                    <option>New Hampshire</option>
+                    <option>New Jersey</option>
+                    <option>New Mexico</option>
+                    <option>New York</option>
+                    <option>North Carolina</option>
+                    <option>North Dakota</option>
+                    <option>Northern Mariana Islands</option>
+                    <option>Ohio</option>
+                    <option>Oklahoma</option>
+                    <option>Oregon</option>
+                    <option>Orleans</option>
+                    <option>Pennsylvania</option>
+                    <option>Philippine Islands</option>
+                    <option>Puerto Rico</option>
+                    <option>Rhode Island</option>
+                    <option>South Carolina</option>
+                    <option>South Dakota</option>
+                    <option>Tennessee</option>
+                    <option>Texas</option>
+                    <option>Utah</option>
+                    <option>Vermont</option>
+                    <option>Virgin Islands</option>
+                    <option>Virginia</option>
+                    <option>Washington</option>
+                    <option>West Virginia</option>
+                    <option>Wisconsin</option>
+                    <option>Wyoming</option>
+                </select>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>

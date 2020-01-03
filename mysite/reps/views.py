@@ -34,6 +34,14 @@ class IndexView(ListView):
         if chamber and chamber != 'Both':
             reps &= house.search('reps', 'chamber', chamber)
 
+        party = self.request.GET.get('party')
+        if party and party != 'All':
+            reps &= house.search('reps', 'party', party)
+
+        state = self.request.GET.get('state')
+        if state and state != 'All':
+            reps &= house.search('reps', 'state', state)
+
         return reps
 
 
