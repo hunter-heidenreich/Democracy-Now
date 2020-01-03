@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
+from django.views.generic import TemplateView, ListView
 
 import sys
 
@@ -10,6 +11,24 @@ if '/Users/hunterheidenreich/git/democracy-now/tools/us/federal/house' not in sy
 from house import USHouse
 
 house = USHouse()
+
+
+class IndexView(ListView):
+    template_name = 'reps/index.html'
+    context_object_name = 'rep_list'
+
+    def get_queryset(self):
+        reps = set(house._reps)
+
+        name = self.request.GET.get('name')
+        if name:
+            reps &= house.search('reps', 'name', name)
+
+        chamber = self.request.GET.get('chamberOpt')
+        if chamber and chamber != 'Both':
+            reps &= house.search('reps', 'chamber', chamber)
+
+        return reps
 
 
 def index(request):

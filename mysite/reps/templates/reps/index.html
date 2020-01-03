@@ -1,24 +1,61 @@
-{% if rep_list %}
-    <table>
-        <thead>
-            <th>Title</th>
-            <th>Name</th>
-            <th>Party</th>
-            <th>State</th>
-            <th>District</th>
-        </thead>
-        <tbody>
-         {% for rep in rep_list %}
-            <tr>
-                <td>{{ rep.basics.title }}</td>
-                <td>{{ rep.basics.name }}</td>
-                <td>{{ rep.get_current_party }}</td>
-                <td>{{ rep.get_state }}</td>
-                <td>{{ rep.get_district }}</td>
-            </tr>
-         {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <p>No representatives are available.</p>
-{% endif %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<div class="container">
+    <div class="row">
+        <h1 class="h1">U.S. Representatives</h1>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form action="{% url 'index' %}" method="get">
+                <label for="nameInput">Name</label>
+                <input id="nameInput" class="form-control" name="name" type="text" placeholder="Search...">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="chamberOpt" id="inlineRadio1" value="Both" checked>
+                  <label class="form-check-label" for="inlineRadio1">Both</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="chamberOpt" id="inlineRadio2" value="House">
+                  <label class="form-check-label" for="inlineRadio2">House</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="chamberOpt" id="inlineRadio3" value="Senate">
+                  <label class="form-check-label" for="inlineRadio3">Senate</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+           {% if rep_list %}
+            <table class="table table-striped table-hover">
+                <thead>
+                    <th>Title</th>
+                    <th>Name</th>
+                    <th>Party</th>
+                    <th>State</th>
+                    <th>District</th>
+                    <th></th>
+                </thead>
+                <tbody>
+                 {% for rep in rep_list %}
+                    <tr>
+                        <td>{{ rep.basics.title }}</td>
+                        <td>{{ rep.basics.name }}</td>
+                        <td>{{ rep.get_current_party }}</td>
+                        <td>{{ rep.get_state }}</td>
+                        <td>{{ rep.get_district }}</td>
+                        <td><a role="button" class="btn btn-primary" href="{% url 'view' rep.basics.name %}">View More</a></td>
+                    </tr>
+                 {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No representatives are available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
