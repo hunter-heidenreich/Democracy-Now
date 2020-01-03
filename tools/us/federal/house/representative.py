@@ -1,5 +1,6 @@
 import re
 import json
+import datetime
 
 from bs4 import BeautifulSoup
 from tqdm import tqdm
@@ -237,6 +238,29 @@ class Representative:
                 return True
 
         return False
+
+    def get_age(self):
+        """
+        Returns the age of the representative
+        """
+        if self.basics['death']:
+            return self.basics['death'] - self.basics['birth']
+        else:
+            return datetime.datetime.now().year - self.basics['birth']
+
+    def get_service(self):
+        """
+        Returns the # of years served
+        """
+        yrs = 0
+        for pos in self.overview['positions']:
+            pos = pos['In Congress']
+            if pos['end']:
+                yrs += pos['end'] - pos['start']
+            else:
+                yrs += datetime.datetime.now().year - pos['start']
+
+        return yrs
 
     def print(self):
         """

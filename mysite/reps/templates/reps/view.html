@@ -3,25 +3,19 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 {% if rep %}
-    <img src="{{ rep.sources.img }}" />
-    <table class="table">
-        <thead>
-            <th>Title</th>
-            <th>Name</th>
-            <th>Party</th>
-            <th>State</th>
-            <th>District</th>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ rep.basics.title }}</td>
-                <td>{{ rep.basics.name }}</td>
-                <td>{{ rep.get_current_party }}</td>
-                <td>{{ rep.get_state }}</td>
-                <td>{{ rep.get_district }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="text-center">
+                    <img src="{{ rep.sources.img }}" alt="{{rep.basics.name}}"/>
+                    <h1 class="h1">{{ rep.basics.name }}</h1>
+                    <h4 class="h4">Age: {{ rep.get_age }} (Status: {% if rep.basics.death %}Deceased{% else %}Alive{% endif %})</h4>
+                    <h4 class="h4">Party: {{ rep.get_current_party }}</h4>
+                    <h4 class="h4">Position: {{ rep.get_state }}-{{ rep.get_district }}</h4>
+                    <h4 class="h4">Years Served: {{ rep.get_service }}</h4>
+                </div>
+            </div>
+    </div>
 {% else %}
     <p>Rep not found.</p>
 {% endif %}
