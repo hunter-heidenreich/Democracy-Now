@@ -21,7 +21,7 @@ class Bill:
 
     def __init__(self, url=None, filename=None):
 
-        self._title = None  # The title of the bill
+        self.title = None  # The title of the bill
         self._congress = None  # The congressional session
 
         # The location of data sources
@@ -36,7 +36,7 @@ class Bill:
         # Progress of bill
         self._bill_progress = {}
 
-        self._title_info = []
+        self.title_info = []
 
         self._action_overview = []
         self._actions = []
@@ -47,9 +47,9 @@ class Bill:
 
         self._related = []
 
-        self._subjects = {}
+        self.subjects = {}
 
-        self._summary = ''
+        self.summary = ''
 
         self._text = ''
 
@@ -65,7 +65,7 @@ class Bill:
             raise ValueError('ValueError: Unspecified bill source.')
 
     def __repr__(self):
-        return self._title
+        return self.title
 
     def load_from_url(self, url, force_reload=False):
         """
@@ -83,10 +83,10 @@ class Bill:
         data = download_file(self._sources['url'], self._sources['html'], force_reload)
         soup = BeautifulSoup(data, 'html.parser')
 
-        self._title = next(
+        self.title = next(
             soup.find('h1', attrs={'class': 'legDetail'}).strings)
-        self._title = self._title[34:]
-        self._title = self._title.split(' - ')[0]
+        self.title = self.title[34:]
+        self.title = self.title.split(' - ')[0]
 
         span = soup.find('h1', attrs={'class': 'legDetail'}).find('span')
         timing = next(span.strings)
@@ -100,7 +100,7 @@ class Bill:
         self._extract_bill_progress(progress)
 
         titles = soup.find('div', attrs={'id': 'titles-content'})
-        self._extract_title_info(titles)
+        self._extracttitle_info(titles)
 
         act_overview = soup.find('div', attrs={'id': 'actionsOverview-content'})
         self._extract_action_overview(act_overview)
@@ -145,11 +145,19 @@ class Bill:
             if th == 'Sponsor:':
                 a = tr.find('a')
                 text = a.text.strip().split()
-                self._overview['sponsor'] = {
-                    'url': self.ROOT_URL + a.get('href'),
-                    'name': ' '.join(text[1:]),
-                    'title': text[0]
-                }
+                intro = list(tr.find('td').strings)[-1]
+                intro = re.search('\d{2}\/\d{2}\/\d{4}', intro)
+                if intro:
+                    self._overview['sponsor'] = {
+                        'url': self.ROOT_URL + a.get('href'),
+                        'name': ' '.join(text[1:]),
+                        'title': text[0],
+                        'date': datetime.strptime(intro.group(),
+                                                  '%m/%d/%Y').timestamp()
+                    }
+                else:
+                    import pdb
+                    pdb.set_trace()
             elif th == 'Committees:':
                 td = tr.find('td').text
                 if 'House' in td:
@@ -229,7 +237,7 @@ class Bill:
                 if c in states:
                     self._bill_progress[text] = states[c]
 
-    def _extract_title_info(self, titles):
+    def _extracttitle_info(self, titles):
         """
         Extracts all title information from a bill
 
@@ -245,7 +253,7 @@ class Bill:
                     if i == 3:
                         t = child.text
                     elif i == 5:
-                        self._title_info.append({
+                        self.title_info.append({
                             'type': 'short',
                             'title': child.text,
                             'location': t,
@@ -260,7 +268,7 @@ class Bill:
         if hc:
             h4s = list(hc.find_all('h4'))[1:]
             for h4 in h4s:
-                self._title_info.append({
+                self.title_info.append({
                     'type': 'short',
                     'title': h4.next_sibling.next_sibling.text.strip(),
                     'location': h4.text,
@@ -271,7 +279,7 @@ class Bill:
         if sc:
             h4s = list(sc.find_all('h4'))[1:]
             for h4 in h4s:
-                self._title_info.append({
+                self.title_info.append({
                     'type': 'short',
                     'title': h4.next_sibling.next_sibling.text.strip(),
                     'location': h4.text,
@@ -284,7 +292,7 @@ class Bill:
         if hc:
             h4s = list(hc.find_all('h4'))[1:]
             for h4 in h4s:
-                self._title_info.append({
+                self.title_info.append({
                     'type': 'official',
                     'title': h4.next_sibling.next_sibling.text.strip(),
                     'location': h4.text,
@@ -295,7 +303,7 @@ class Bill:
         if sc:
             h4s = list(sc.find_all('h4'))[1:]
             for h4 in h4s:
-                self._title_info.append({
+                self.title_info.append({
                     'type': 'official',
                     'title': h4.next_sibling.next_sibling.text.strip(),
                     'location': h4.text,
@@ -523,7 +531,7 @@ class Bill:
         """
 
         ps = div.find_all('p')
-        self._summary = '\n'.join([p.text.strip() for p in ps])
+        self.summary = '\n'.join([p.text.strip() for p in ps])
 
     def _extract_text(self, force_reload=False):
         """
@@ -606,20 +614,27 @@ class Bill:
         """
         pass
 
+    def refresh(self):
+        """
+        Does a soft refresh of the HTML content
+        """
+        self.load_from_url(url=self._sources['url'])
+        self.to_json()
+
     def to_json(self):
         """
         Dumps the Bill to a JSON readable format
         """
         filename = '{}_{}.json'.format(self._congress,
-                                       self._title.split(' - ')[0])
+                                       self.title.split(' - ')[0])
 
         json.dump({
-            'title': self._title,
+            'title': self.title,
             'congress': self._congress,
             'sources': self._sources,
             'overview': self._overview,
             'progress': self._bill_progress,
-            'title_info': self._title_info,
+            'title_info': self.title_info,
             'action_overview': self._action_overview,
             'actions': self._actions,
             'cosponsors': self._cosponsors,
@@ -640,19 +655,19 @@ class Bill:
         :param filename: The location on the local disk - str
         """
         data = json.load(open(filename))
-        self._title = data['title']
+        self.title = data['title']
         self._congress = data['congress']
         self._sources = data['sources']
         self._overview = data['overview']
         self._bill_progress = data['progress']
-        self._title_info = data['title_info']
+        self.title_info = data['title_info']
         self._action_overview = data['action_overview']
         self._actions = data['actions']
         self._cosponsors = data['cosponsors']
         self._committees = data['committees']
         self._related = data['related_bills']
-        self._subjects = data['subjects']
-        self._summary = data['summary']
+        self.subjects = data['subjects']
+        self.summary = data['summary']
         self._text = data['text']
         self._amendments = data['amendments']
         self._cost_estimates = data['cost']
@@ -674,6 +689,9 @@ class Bill:
     def get_congress(self):
         return self._congress
 
+    def get_introduced_date(self):
+        return '{}'.format(datetime.fromtimestamp(self.get_overview()['sponsor']['date']))
+    
     def __hash__(self):
         try:
             return hash(self._sources['url'])
@@ -692,9 +710,11 @@ class Bill:
         if key == 'source':
             return value in self._sources.values()
         elif key == 'title':
-            return value == self._title
+            return value == self.title
         elif key == 'congress':
             return value == self._congress
+        elif key == 'sponsor url':
+            return value == self._overview['sponsor']['url']
         else:
             print('Unknown property for bill. Returning False')
 
@@ -705,8 +725,6 @@ if __name__ == '__main__':
     from tqdm import tqdm
     new, old = get_bill_urls()
     for f in tqdm(new):
-        try:
-            Bill(url=f)
-        except AttributeError:
-            import pdb
-            pdb.set_trace()
+        Bill(url=f)
+    for f in tqdm(old):
+        Bill(url=f).refresh()

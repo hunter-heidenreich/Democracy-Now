@@ -50,8 +50,15 @@ def view(request, name):
     rep = list(house.search('reps', 'name', name))
     if rep:
         rep = rep[0]
+        bills = house.search('reps', 'sponsor', rep.sources['url'])
+        bills &= house.search('bills', 'congress', 116)
+        bills = sorted(bills,
+                       key=lambda bill: bill.get_overview()['sponsor']['date'],
+                       reverse=True)
+        print(bills)
         context = {
             'rep': rep,
+            'bills': bills,
         }
         return HttpResponse(template.render(context, request))
     else:
