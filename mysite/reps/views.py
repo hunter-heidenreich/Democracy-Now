@@ -46,11 +46,15 @@ class IndexView(ListView):
 
 
 def view(request, name):
-    rep = house.search('reps', 'name', name).pop()
     template = loader.get_template('reps/view.html')
-    context = {
-        'rep': rep,
-    }
-    return HttpResponse(template.render(context, request))
+    rep = list(house.search('reps', 'name', name))
+    if rep:
+        rep = rep[0]
+        context = {
+            'rep': rep,
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse(template.render({}, request))
 
 

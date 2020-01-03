@@ -13,6 +13,7 @@ from utils import download_file, get_representative_urls
 
 class Representative:
     ROOT_DIR = 'data/us/federal/house/reps/'
+    ROOT_URL = 'https://www.congress.gov/'
 
     def __init__(self, url='', filename=''):
         # The location of data sources
@@ -53,6 +54,12 @@ class Representative:
 
         prof = soup.find('div', attrs={'class': 'overview-member-column-profile member_profile'})
         self._extract_overview(prof)
+
+        pic = soup.find('div', attrs={'class': 'overview-member-column-picture'})
+        try:
+            self.sources['img'] = self.ROOT_URL + pic.find('img').get('src')
+        except AttributeError:
+            self.sources['img'] = None
 
         self.to_json()
 
@@ -144,6 +151,14 @@ class Representative:
                 print('New Info!')
                 import pdb
                 pdb.set_trace()
+
+    def refresh(self, force_reload=False):
+        """
+        A soft refresh
+
+        :param force_reload: Whether or not to perform a hard refresh
+        """
+        self.load(self.sources['url'], force_reload=force_reload)
 
     def to_json(self):
         """
@@ -246,6 +261,7 @@ class Representative:
             v = value.lower()
             v = ''.join([let for let in v if 'a' <= let <= 'z'])
             name = self.basics['name'].lower()
+            name = ''.join([let for let in name if 'a' <= let <= 'z'])
             lcs = pylcs.lcs(v, name)
             return lcs == len(v)
         elif key == 'chamber':
@@ -276,3 +292,6 @@ if __name__ == '__main__':
     new, old = get_representative_urls()
     for url in tqdm(new):
         Representative(url=url)
+
+    for url in tqdm(old):
+        Representative(url=url).refresh()
