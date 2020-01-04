@@ -1,6 +1,8 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.views.generic import TemplateView, ListView
+
+from collections import Counter
 
 import sys
 
@@ -72,4 +74,24 @@ def view(request, name):
     else:
         return HttpResponse(template.render({}, request))
 
+
+def count_data(request, name, data):
+    rep = list(house.search('reps', 'name', name))
+    res = {}
+    if rep:
+        rep = rep[0]
+        if data == 'sponsor_subj':
+            sponsor = house.search('reps', 'sponsor', rep.sources['url'])
+            cnt = Counter([bill.subjects['main']['title'] for bill in sponsor if 'main' in bill.subjects])
+            cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
+                         key=lambda x: x['value'])
+            res['res'] = cnt
+        elif data == 'cosponsor_subj':
+            cosp = house.search('reps', 'cosponsor', rep.sources['url'])
+            cnt = Counter([bill.subjects['main']['title'] for bill in cosp if 'main' in bill.subjects])
+            cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
+                         key=lambda x: x['value'])
+            res['res'] = cnt
+
+    return JsonResponse(res)
 

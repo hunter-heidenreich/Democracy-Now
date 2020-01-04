@@ -2,10 +2,17 @@
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
+
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/4.7.2/d3.min.js"></script>
+
 
 {% load static %}
 <script src="{% static 'javascript/d3pie.min.js' %}"></script>
+<script src="{% static 'javascript/rep.js' %}"></script>
 
 <div class="container">
     {% if rep %}
@@ -52,210 +59,22 @@
 
     <div class="row">
         <div class="col">
-            <h5 class="h5">Bills sponsored this session:</h5>
-            {% if sponsor %}
-            <table class="table table-striped table-hover">
-                <thead>
-                    <th>Title</th>
-                    <th>Introduced</th>
-                    <th>Subject</th>
-                    <!--<th>Summary</th>-->
-                    <th>Progress</th>
-                </thead>
-                <tbody>
-                    {% for bill in sponsor %}
-                    <tr>
-                        <td>{{ bill.title }}</td>
-                        <td>{{ bill.get_introduced_date }}</td>
-                        <td>{{ bill.subjects.main.title }}</td>
-                        <!--<td>{{ bill.summary }}</td>-->
-                        <td>{{ bill.get_progress }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No sponsored bills this session.</p>
-            {% endif %}
-        </div>
-        <div class="col" id="sponsorPie">
-            <script>
-            var pie = new d3pie("sponsorPie", {
-                header: {
-                    title: {
-                        text:    "",
-                        color:    "#333333",
-                        fontSize: 18,
-                        font:     "arial"
-                    },
-                    subtitle: {
-                        color:    "#666666",
-                        fontSize: 14,
-                        font:     "arial"
-                    },
-                    location: "top-center",
-                    titleSubtitlePadding: 8
-                },
-                footer: {
-                    text: 	  "",
-                    color:    "#666666",
-                    fontSize: 14,
-                    font:     "arial",
-                    location: "left"
-                },
-                size: {
-                    canvasHeight: 500,
-                    canvasWidth: 500,
-                    pieInnerRadius: 0,
-                    pieOuterRadius: null
-                },
-                data: {
-                    sortOrder: "none",
-                    smallSegmentGrouping: {
-                        enabled: false,
-                        value: 1,
-                        valueType: "percentage",
-                        label: "Other",
-                        color: "#cccccc"
-                    },
+            <div class="dropdown">
+                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Visualize Bill Data
+                </a>
 
-                    // REQUIRED! This is where you enter your pie data; it needs to be an array of objects
-                    // of this form: { label: "label", value: 1.5, color: "#000000" } - color is optional
-                    content: [{ label: "label", value: 1.5, color: "#000000" }]
-                },
-                labels: {
-                    outer: {
-                        format: "label",
-                        hideWhenLessThanPercentage: null,
-                        pieDistance: 30
-                    },
-                    inner: {
-                        format: "percentage",
-                        hideWhenLessThanPercentage: null
-                    },
-                    mainLabel: {
-                        color: "#333333",
-                        font: "arial",
-                        fontSize: 10
-                    },
-                    percentage: {
-                        color: "#dddddd",
-                        font: "arial",
-                        fontSize: 10,
-                        decimalPlaces: 0
-                    },
-                    value: {
-                        color: "#cccc44",
-                        font: "arial",
-                        fontSize: 10
-                    },
-                    lines: {
-                        enabled: true,
-                        style: "curved",
-                        color: "segment" // "segment" or a hex color
-                    }
-                },
-                effects: {
-                    load: {
-                        effect: "default", // none / default
-                        speed: 1000
-                    },
-                    pullOutSegmentOnClick: {
-                        effect: "bounce", // none / linear / bounce / elastic / back
-                        speed: 300,
-                        size: 10
-                    },
-                    highlightSegmentOnMouseover: true,
-                    highlightLuminosity: -0.2
-                },
-                tooltips: {
-                    enabled: false,
-                    type: "placeholder", // caption|placeholder
-                    string: "",
-                    placeholderParser: null,
-                    styles: {
-                        fadeInSpeed: 250,
-                        backgroundColor: "#000000",
-                        backgroundOpacity: 0.5,
-                        color: "#efefef",
-                        borderRadius: 2,
-                        font: "arial",
-                        fontSize: 10,
-                        padding: 4
-                    }
-                },
-
-                misc: {
-                    colors: {
-                        background: null, // transparent
-                        segments: [
-                            "#2484c1", "#65a620", "#7b6888", "#a05d56", "#961a1a",
-                            "#d8d23a", "#e98125", "#d0743c", "#635222", "#6ada6a",
-                            "#0c6197", "#7d9058", "#207f33", "#44b9b0", "#bca44a",
-                            "#e4a14b", "#a3acb2", "#8cc3e9", "#69a6f9", "#5b388f",
-                            "#546e91", "#8bde95", "#d2ab58", "#273c71", "#98bf6e",
-                            "#4daa4b", "#98abc5", "#cc1010", "#31383b", "#006391",
-                            "#c2643f", "#b0a474", "#a5a39c", "#a9c2bc", "#22af8c",
-                            "#7fcecf", "#987ac6", "#3d3b87", "#b77b1c", "#c9c2b6",
-                            "#807ece", "#8db27c", "#be66a2", "#9ed3c6", "#00644b",
-                            "#005064", "#77979f", "#77e079", "#9c73ab", "#1f79a7"
-                        ],
-                        segmentStroke: "#ffffff"
-                    },
-                    gradient: {
-                        enabled: false,
-                        percentage: 95,
-                        color: "#000000"
-                    },
-                    canvasPadding: {
-                        top: 5,
-                        right: 5,
-                        bottom: 5,
-                        left: 5
-                    },
-                    pieCenterOffset: {
-                        x: 0,
-                        y: 0
-                    },
-                    cssPrefix: null
-                },
-                callbacks: {
-                    onload: null,
-                    onMouseoverSegment: null,
-                    onMouseoutSegment: null,
-                    onClickSegment: null
-                }
-            });
-            </script>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="#" onclick="displaySponsored()">Count Sponsorsed</a>
+                    <a class="dropdown-item" href="#" onclick="displayCosponsored()">Count Cosponsorsed</a>
+                </div>
+            </div>
         </div>
-        <!--
+    </div>
+
+    <div class="row">
         <div class="col">
-            <h5 class="h5">Bills cosponsored this session:</h5>
-            {% if cosponsor %}
-            <table class="table table-striped table-hover">
-                <thead>
-                    <th>Title</th>
-                    <th>Introduced</th>
-                    <th>Subject</th>
-                    <th>Summary</th>
-                    <th>Progress</th>
-                </thead>
-                <tbody>
-                    {% for bill in cosponsor %}
-                    <tr>
-                        <td>{{ bill.title }}</td>
-                        <td>{{ bill.get_introduced_date }}</td>
-                        <td>{{ bill.subjects.main.title }}</td>
-                        <td>{{ bill.summary }}</td>
-                        <td>{{ bill.get_progress }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No cosponsored bills this session.</p>
-            {% endif %}
+            <div id="data-viz"></div>
         </div>
-        -->
     </div>
 </div>
