@@ -1,0 +1,9 @@
+{% if bills %}
+<ol>
+    {% for bill in bills %}
+    <li>{{ bill }}</li>
+    {% endfor %}
+</ol>
+{% else %}
+    <p>No bills</p>
+{% endif %}
