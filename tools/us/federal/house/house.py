@@ -69,6 +69,46 @@ class USHouse:
         vote_paths = get_jsons(Vote.ROOT_DIR)
         self._votes = [Vote(filename=p) for p in tqdm(vote_paths)]
 
+        self._check_votes()
+
+    def _check_votes(self):
+        """
+        Verifies that the data present in votes is accounted for elsewhere.
+        """
+        # Verify bills voted on
+        print('Verifying bills versus votes')
+        for vote in tqdm(self._votes):
+            bills = set(self._bills)
+
+            # Filter by congress
+            congress = int(vote._congress['congress'])
+            bills &= self.search('bills', 'congress', congress)
+
+            # Filter by Legislation #
+            legisname = vote._congress['legis_num']
+            bills &= self.search('bills', 'title', legisname)
+
+            if len(bills) > 1:
+                print('Too many bills left!')
+                import pdb
+                pdb.set_trace()
+            elif len(bills) == 0:
+                if 'H RES' in legisname:
+                    print('Downloading new resolution')
+                    num = legisname.split()[-1]
+                    bl = Bill(
+                        url='https://www.congress.gov/bill/{}th-congress/house-resolution/{}/all-info'.format(
+                            congress, num))
+                    self._bills.append(bl)
+                    bills = set(bl)
+                else:
+                    import pdb
+                    pdb.set_trace()
+
+            bill = list(bills)[0]
+            self._search_by['bill']['vote'][vote] = bill
+            self._search_by['vote']['bill'][bill].add(vote)
+
     def search(self, group, key, value):
         if value in self._search_by[group][key]:
             return self._search_by[group][key][value]
@@ -95,17 +135,3 @@ class USHouse:
 if __name__ == '__main__':
     house = USHouse()
 
-    target = 'Schiff'
-    rep = house.search('reps', 'name', target)
-    bills = set()
-
-    if rep:
-        rep = list(rep)[0]
-        bills = house.search('reps', 'sponsor', rep.sources['url'])
-
-        for bill in bills:
-            print(bill)
-
-
-    import pdb
-    pdb.set_trace()

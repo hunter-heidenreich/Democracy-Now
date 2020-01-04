@@ -640,8 +640,8 @@ class Bill:
             'cosponsors': self._cosponsors,
             'committees': self._committees,
             'related_bills': self._related,
-            'subjects': self._subjects,
-            'summary': self._summary,
+            'subjects': self.subjects,
+            'summary': self.summary,
             'text': self._text,
             'amendments': self._amendments,
             'cost': self._cost_estimates
@@ -711,7 +711,8 @@ class Bill:
         if key == 'source':
             return value in self._sources.values()
         elif key == 'title':
-            return value == self.title
+            value = value.replace(' ', '.')
+            return value.lower() == self.title.lower()
         elif key == 'congress':
             return value == self._congress
         elif key == 'sponsor url':
