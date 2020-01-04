@@ -96,6 +96,35 @@ def get_bill_urls():
     return new_urls, old_urls
 
 
+def get_vote_urls():
+    """
+    Gets the URLs of Votes to scrape from data present on machine
+    :return: Two sets of URLs, un-downloaded and downloaded
+    """
+    new_urls = set()
+    old_urls = set()
+    for f in tqdm(glob('data/us/federal/house/votes/json/*.json')):
+        data = json.load(open(f))
+        old_urls.add(data['sources']['url'])
+
+    for f in tqdm(glob('data/us/federal/house/session/json/*.json')):
+        data = json.load(open(f))
+
+        for act in data['activities']:
+            for fl in act['floor_actions']:
+                if fl['item']:
+                    if fl['item']['type'] == 'vote':
+                        v = fl['item']['link']
+                        if 'clerk.house.gov' not in v:
+                            import pdb
+                            pdb.set_trace()
+                        else:
+                            new_urls.add(v)
+
+    new_urls -= old_urls
+    return new_urls, old_urls
+
+
 def get_jsons(path, pattern='json/*.json'):
     """
     Given a path, extracts all the JSON files

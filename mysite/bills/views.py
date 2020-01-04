@@ -9,9 +9,7 @@ if '/Users/hunterheidenreich/git/democracy-now/tools/us/federal/house' not in sy
     sys.path.append('/Users/hunterheidenreich/git/democracy-now/tools/us/federal/house')
 
 
-from house import USHouse
-
-house = USHouse()
+from house import HOUSE
 
 
 class IndexView(ListView):
@@ -19,4 +17,4 @@ class IndexView(ListView):
     context_object_name = 'bills'
 
     def get_queryset(self):
-        return house._bills
+        return HOUSE._bills

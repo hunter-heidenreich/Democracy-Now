@@ -69,7 +69,7 @@ class USHouse:
         vote_paths = get_jsons(Vote.ROOT_DIR)
         self._votes = [Vote(filename=p) for p in tqdm(vote_paths)]
 
-        self._check_votes()
+        # self._check_votes()
 
     def _check_votes(self):
         """
@@ -93,21 +93,49 @@ class USHouse:
                 import pdb
                 pdb.set_trace()
             elif len(bills) == 0:
-                if 'H RES' in legisname:
-                    print('Downloading new resolution')
+                try:
                     num = legisname.split()[-1]
-                    bl = Bill(
-                        url='https://www.congress.gov/bill/{}th-congress/house-resolution/{}/all-info'.format(
-                            congress, num))
-                    self._bills.append(bl)
-                    bills = set(bl)
+                except IndexError:
+                    continue
+
+                if 'H CON RES' in legisname:
+                    print('Downloading new house concurrent resolution')
+                    tp = 'house-concurrent-resolution'
+                elif 'H J RES' in legisname:
+                    print('Downloading new house joint resolution')
+                    tp = 'house-joint-resolution'
+                elif 'H RES' in legisname:
+                    print('Downloading new house resolution')
+                    tp = 'house-resolution'
+                elif 'S CON RES ' in legisname:
+                    print('Downloading new senate concurrent resolution')
+                    tp = 'senate-concurrent-resolution'
+                elif 'S J RES' in legisname:
+                    print('Downloading new senate joint resolution')
+                    tp = 'senate-joint-resolution'
+                elif len(legisname.split()) == 2 and legisname.split()[0] == 'S':
+                    print('Downloading new senate bill')
+                    tp = 'senate-bill'
+                elif 'H R ' in legisname:
+                    print('Downloading new house bill')
+                    tp = 'house-bill'
+                elif legisname == 'MOTION':
+                    tp = None
                 else:
                     import pdb
                     pdb.set_trace()
 
-            bill = list(bills)[0]
-            self._search_by['bill']['vote'][vote] = bill
-            self._search_by['vote']['bill'][bill].add(vote)
+                if tp:
+                    bl = Bill(
+                        url='https://www.congress.gov/bill/{}th-congress/{}/{}/all-info'.format(
+                            congress, tp, num))
+                    self._bills.append(bl)
+                    bills = set()
+                    bills.add(bl)
+            if bills:
+                bill = list(bills)[0]
+                self._search_by['bill']['vote'][vote] = bill
+                self._search_by['vote']['bill'][bill].add(vote)
 
     def search(self, group, key, value):
         if value in self._search_by[group][key]:
@@ -131,6 +159,8 @@ class USHouse:
             else:
                 print('Invalid search group: {}'.format(group))
 
+
+HOUSE = USHouse()
 
 if __name__ == '__main__':
     house = USHouse()

@@ -5,7 +5,7 @@ from collections import defaultdict
 
 from bs4 import BeautifulSoup
 
-from utils import download_file
+from utils import download_file, get_vote_urls
 
 
 class Vote:
@@ -58,6 +58,13 @@ class Vote:
         xml = download_file(self._sources['url'], self._sources['xml'], force_reload)
         soup = BeautifulSoup(xml, 'xml')
 
+        try:
+            self._congress['majority'] = soup.find('majority').text
+        except AttributeError:
+            xml = download_file(self._sources['url'], self._sources['xml'],
+                                force_reload)[3:]
+            soup = BeautifulSoup(xml, 'xml')
+
         self._extract_congressional_info(soup)
         self._extract_basic_vote(soup)
         self._process_datetime(soup)
@@ -72,7 +79,11 @@ class Vote:
 
         :param soup: The entire xml as a BeautifulSoup
         """
-        self._congress['majority'] = soup.find('majority').text
+        try:
+            self._congress['majority'] = soup.find('majority').text
+        except AttributeError:
+            import pdb
+            pdb.set_trace()
         self._congress['congress'] = soup.find('congress').text
         self._congress['session'] = soup.find('session').text
         self._congress['legis_num'] = soup.find('legis-num').text
@@ -143,13 +154,18 @@ class Vote:
 
         :param soup: The entire XML as a soup object
         """
-        date = soup.find('action-date').text.split('-')
-        conv = {v: k for k, v in enumerate(calendar.month_abbr)}
-        date[1] = conv[date[1]]
-        time = soup.find('action-time').get('time-etz').split(':')
-        dt = datetime.datetime(int(date[2]), date[1], int(date[0]),
-                               hour=int(time[0]), minute=int(time[1]))
-        self._votes['datetime'] = dt.timestamp()
+        try:
+            date = soup.find('action-date').text.split('-')
+            conv = {v: k for k, v in enumerate(calendar.month_abbr)}
+            date[1] = conv[date[1]]
+            time = soup.find('action-time').get('time-etz').split(':')
+            dt = datetime.datetime(int(date[2]), date[1], int(date[0]),
+                                   hour=int(time[0]), minute=int(time[1]))
+            self._votes['datetime'] = dt.timestamp()
+        except AttributeError:
+            # This seems to have occurred for votes that have been
+            # deleted from record
+            pass
 
     def to_json(self):
         """
@@ -179,9 +195,8 @@ class Vote:
 
 
 if __name__ == '__main__':
-    from glob import glob
     from tqdm import tqdm
 
-    for f in tqdm(glob('data/us/federal/house/votes/web/*')):
-        url = 'https://' + f.split('/')[-1].replace('_', '/')
-        v = Vote(url=url)
+    new, old = get_vote_urls()
+    for f in tqdm(new):
+        v = Vote(url=f)

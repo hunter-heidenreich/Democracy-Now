@@ -143,18 +143,27 @@ class Bill:
         for i, tr in enumerate(overview.find_all('tr')):
             th = tr.find('th').text
             if th == 'Sponsor:':
-                a = tr.find('a')
-                text = a.text.strip().split()
+
                 intro = list(tr.find('td').strings)[-1]
                 intro = re.search('\d{2}\/\d{2}\/\d{4}', intro)
                 if intro:
-                    self._overview['sponsor'] = {
-                        'url': self.ROOT_URL + a.get('href'),
-                        'name': ' '.join(text[1:]),
-                        'title': text[0],
-                        'date': datetime.strptime(intro.group(),
-                                                  '%m/%d/%Y').timestamp()
-                    }
+                    try:
+                        a = tr.find('a')
+                        text = a.text.strip().split()
+                        self._overview['sponsor'] = {
+                            'url': self.ROOT_URL + a.get('href'),
+                            'name': ' '.join(text[1:]),
+                            'title': text[0],
+                            'date': datetime.strptime(intro.group(),
+                                                      '%m/%d/%Y').timestamp()
+                        }
+                    except AttributeError:
+                        text = 'No sponsor'
+                        self._overview['sponsor'] = {
+                            'name': text,
+                            'date': datetime.strptime(intro.group(),
+                                                      '%m/%d/%Y').timestamp()
+                        }
                 else:
                     import pdb
                     pdb.set_trace()
@@ -508,12 +517,17 @@ class Bill:
         if nav:
             uls = nav.find('ul')
             if uls:
-                hrefs = list(uls.find_all('a'))
-                self.subjects['main'] = {
-                    'title': hrefs[0].text.strip(),
-                    'url': hrefs[0].get('href')
-                }
-
+                try:
+                    hrefs = list(uls.find_all('a'))
+                    self.subjects['main'] = {
+                        'title': hrefs[0].text.strip(),
+                        'url': hrefs[0].get('href')
+                    }
+                except IndexError:
+                    hrefs = list(uls.find_all('li'))
+                    self.subjects['main'] = {
+                        'title': hrefs[0].text.strip(),
+                    }
         others = div.find('div', attrs={'class': 'search-column-main'})
         if others:
             self.subjects['others'] = []
@@ -544,7 +558,10 @@ class Bill:
 
         soup = BeautifulSoup(html, 'html.parser')
         container = soup.find('pre', attrs={'id': 'billTextContainer'})
-        self._text = container.text.strip()
+        try:
+            self._text = container.text.strip()
+        except AttributeError:
+            self._text = ''
 
     def _extract_amendments(self, force_reload=False):
         """
@@ -716,7 +733,8 @@ class Bill:
         elif key == 'congress':
             return value == self._congress
         elif key == 'sponsor url':
-            return value == self._overview['sponsor']['url']
+            if 'sponsor' in self._overview and 'url' in self._overview['sponsor']:
+                return value == self._overview['sponsor']['url']
         elif key == 'cosponsor url':
             return value in [co['cosponsors']['url'] for co in self._cosponsors]
         else:
@@ -730,5 +748,5 @@ if __name__ == '__main__':
     new, old = get_bill_urls()
     for f in tqdm(new):
         Bill(url=f)
-    for f in tqdm(old):
-        Bill(url=f).refresh()
+    # for f in tqdm(old):
+    #     Bill(url=f).refresh()
