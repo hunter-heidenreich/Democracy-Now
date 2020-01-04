@@ -84,13 +84,13 @@ def count_data(request, name, data):
             sponsor = house.search('reps', 'sponsor', rep.sources['url'])
             cnt = Counter([bill.subjects['main']['title'] for bill in sponsor if 'main' in bill.subjects])
             cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
-                         key=lambda x: x['value'])
+                         key=lambda x: x['value'], reverse=True)
             res['res'] = cnt
         elif data == 'cosponsor_subj':
             cosp = house.search('reps', 'cosponsor', rep.sources['url'])
             cnt = Counter([bill.subjects['main']['title'] for bill in cosp if 'main' in bill.subjects])
             cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
-                         key=lambda x: x['value'])
+                         key=lambda x: x['value'], reverse=True)
             res['res'] = cnt
 
     return JsonResponse(res)

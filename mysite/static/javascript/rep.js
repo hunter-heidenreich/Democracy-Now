@@ -1,161 +1,122 @@
+function displaySubject() {
+    var value = $('#billRelationSelect').children('option:selected').text()
+    console.log(value);
+    if (value == 'Sponsor')
+        displaySponsored();
+    else if (value == 'Cosponsor')
+        displayCosponsored();
+}
+
 function displaySponsored() {
     $.getJSON('./data/count/sponsor_subj/', function(data) {
-        displayPie(data);
+        displayCount(data['res']);
     });
 }
 
 function displayCosponsored() {
     $.getJSON('./data/count/cosponsor_subj/', function(data) {
-        displayPie(data);
+        displayCount(data['res']);
     });
 }
 
-function displayPie(data) {
+function displayCount(data) {
     $('#data-viz').empty();
-    var pie = new d3pie("data-viz", {
-        header: {
-            title: {
-                text:    "",
-                color:    "#333333",
-                fontSize: 18,
-                font:     "arial"
-            },
-            subtitle: {
-                color:    "#666666",
-                fontSize: 14,
-                font:     "arial"
-            },
-            location: "top-center",
-            titleSubtitlePadding: 8
-        },
-        footer: {
-            text: 	  "",
-            color:    "#666666",
-            fontSize: 14,
-            font:     "arial",
-            location: "left"
-        },
-        size: {
-            canvasHeight: 500,
-            canvasWidth: 500,
-            pieInnerRadius: 0,
-            pieOuterRadius: null
-        },
-        data: {
-            sortOrder: "none",
-            smallSegmentGrouping: {
-                enabled: false,
-                value: 1,
-                valueType: "percentage",
-                label: "Other",
-                color: "#cccccc"
-            },
+    var h = 600;
+    var w = 800;
+    var margin_fact = 0.25;
 
-            // REQUIRED! This is where you enter your pie data; it needs to be an array of objects
-            // of this form: { label: "label", value: 1.5, color: "#000000" } - color is optional
-            content: data['res'] // [{ label: "label", value: 1.5, color: "#000000" }]
-        },
-        labels: {
-            outer: {
-                format: "label",
-                hideWhenLessThanPercentage: null,
-                pieDistance: 30
-            },
-            inner: {
-                format: "percentage",
-                hideWhenLessThanPercentage: null
-            },
-            mainLabel: {
-                color: "#333333",
-                font: "arial",
-                fontSize: 10
-            },
-            percentage: {
-                color: "#dddddd",
-                font: "arial",
-                fontSize: 10,
-                decimalPlaces: 0
-            },
-            value: {
-                color: "#cccc44",
-                font: "arial",
-                fontSize: 10
-            },
-            lines: {
-                enabled: true,
-                style: "curved",
-                color: "segment" // "segment" or a hex color
-            }
-        },
-        effects: {
-            load: {
-                effect: "default", // none / default
-                speed: 1000
-            },
-            pullOutSegmentOnClick: {
-                effect: "bounce", // none / linear / bounce / elastic / back
-                speed: 300,
-                size: 10
-            },
-            highlightSegmentOnMouseover: true,
-            highlightLuminosity: -0.2
-        },
-        tooltips: {
-            enabled: false,
-            type: "placeholder", // caption|placeholder
-            string: "",
-            placeholderParser: null,
-            styles: {
-                fadeInSpeed: 250,
-                backgroundColor: "#000000",
-                backgroundOpacity: 0.5,
-                color: "#efefef",
-                borderRadius: 2,
-                font: "arial",
-                fontSize: 10,
-                padding: 4
-            }
-        },
+    // set the dimensions and margins of the graph
+    var margin = {top: h * margin_fact, right: w * margin_fact, bottom: h * margin_fact, left: w * margin_fact},
+    width = w - margin.left - margin.right,
+    height = h - margin.top - margin.bottom;
 
-        misc: {
-            colors: {
-                background: null, // transparent
-                segments: [
-                    "#2484c1", "#65a620", "#7b6888", "#a05d56", "#961a1a",
-                    "#d8d23a", "#e98125", "#d0743c", "#635222", "#6ada6a",
-                    "#0c6197", "#7d9058", "#207f33", "#44b9b0", "#bca44a",
-                    "#e4a14b", "#a3acb2", "#8cc3e9", "#69a6f9", "#5b388f",
-                    "#546e91", "#8bde95", "#d2ab58", "#273c71", "#98bf6e",
-                    "#4daa4b", "#98abc5", "#cc1010", "#31383b", "#006391",
-                    "#c2643f", "#b0a474", "#a5a39c", "#a9c2bc", "#22af8c",
-                    "#7fcecf", "#987ac6", "#3d3b87", "#b77b1c", "#c9c2b6",
-                    "#807ece", "#8db27c", "#be66a2", "#9ed3c6", "#00644b",
-                    "#005064", "#77979f", "#77e079", "#9c73ab", "#1f79a7"
-                ],
-                segmentStroke: "#ffffff"
-            },
-            gradient: {
-                enabled: false,
-                percentage: 95,
-                color: "#000000"
-            },
-            canvasPadding: {
-                top: 5,
-                right: 5,
-                bottom: 5,
-                left: 5
-            },
-            pieCenterOffset: {
-                x: 0,
-                y: 0
-            },
-            cssPrefix: null
-        },
-        callbacks: {
-            onload: null,
-            onMouseoverSegment: null,
-            onMouseoutSegment: null,
-            onClickSegment: null
-        }
-    });
+    // append the svg object to the body of the page
+    var svg = d3.select("#data-viz")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform",
+                      "translate(" + margin.left + "," + margin.top + ")");
+
+    var vals = data.map(function(d) { return d.value; })
+    var mx = Math.max(...vals)
+
+    // Add X axis
+    var x = d3.scaleLinear()
+        .domain([0, mx])
+        .range([ 0, width]);
+
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x))
+        .selectAll("text")
+        .attr("transform", "translate(-10,0)rotate(-45)")
+        .style("text-anchor", "end");
+
+    // Y axis
+    var y = d3.scaleBand()
+        .range([ 0, height ])
+        .domain(data.map(function(d) { return d.label; }))
+        .padding(.1);
+
+    svg.append("g")
+        .call(d3.axisLeft(y))
+
+    // Add a tooltip div. Here I define the general feature of the tooltip: stuff that do not depend on the data point.
+    // Its opacity is set to 0: we don't see it by default.
+    var tooltip = d3.select("#data-viz")
+        .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "white")
+            .style("border", "solid")
+            .style("border-width", "1px")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+
+    // A function that change this tooltip when the user hover a point.
+    // Its opacity is set to 1: we can now see it. Plus it set the text and position of tooltip depending on the datapoint (d)
+    var mouseover = function(d) {
+        tooltip
+            .style("opacity", 1)
+    }
+
+    var mousemove = function(d) {
+        tooltip
+        .html("# of Bills: " + d.value)
+        .style("left", (d3.mouse(this)[0]+90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+        .style("top", (d3.mouse(this)[1]) + "px")
+    }
+
+    // A function that change this tooltip when the leaves a point: just need to set opacity to 0 again
+    var mouseleave = function(d) {
+        tooltip
+            .transition()
+            .duration(200)
+            .style("opacity", 0)
+    }
+
+    //Bars
+    svg.selectAll("myRect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", x(0) )
+        .attr("y", function(d) { return y(d.label); })
+        .attr("width", function(d) { return x(0); })
+        .attr("height", y.bandwidth() )
+        .attr("fill", "#69b3a2")
+        .on("mouseover", mouseover )
+        .on("mousemove", mousemove )
+        .on("mouseleave", mouseleave )
+
+    // Animation
+    svg.selectAll("rect")
+        .transition()
+        .duration(800)
+        .attr("x", function(d) { return x(0); })
+        .attr("width", function(d) { return x(d.value); })
+        .delay(function(d,i){console.log(i) ; return(i*100)})
+
 }
