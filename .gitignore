@@ -3,4 +3,4 @@ venv/*
 data/*
 *.sqlite3
 *.cpython-36.pyc
-mysite/static/*
+mysite/static/admin/*
