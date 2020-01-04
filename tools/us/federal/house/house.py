@@ -95,5 +95,17 @@ class USHouse:
 if __name__ == '__main__':
     house = USHouse()
 
+    target = 'Schiff'
+    rep = house.search('reps', 'name', target)
+    bills = set()
+
+    if rep:
+        rep = list(rep)[0]
+        bills = house.search('reps', 'sponsor', rep.sources['url'])
+
+        for bill in bills:
+            print(bill)
+
+
     import pdb
     pdb.set_trace()
