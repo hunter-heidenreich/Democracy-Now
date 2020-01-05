@@ -7,7 +7,7 @@ from bill import Bill
 from representative import Representative
 from vote import Vote
 
-from utils import get_jsons
+from utils import get_jsons, download_file
 
 
 class USHouse:
@@ -163,5 +163,13 @@ class USHouse:
 HOUSE = USHouse()
 
 if __name__ == '__main__':
-    house = USHouse()
+    reps = HOUSE.search('reps', 'name', 'Dwight Evans')
+    if reps:
+        rep = list(reps)[0]
+        rep.download_all_bills()
+
+        import pdb
+        pdb.set_trace()
+
+
 

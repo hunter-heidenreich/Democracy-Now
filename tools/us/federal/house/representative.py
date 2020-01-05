@@ -1,7 +1,9 @@
 import re
 import json
 import datetime
+import requests
 
+from glob import glob
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from pprint import pprint
@@ -10,6 +12,7 @@ import us
 import pylcs
 
 from utils import download_file, get_representative_urls
+from bill import Bill
 
 
 class Representative:
@@ -152,6 +155,37 @@ class Representative:
                 print('New Info!')
                 import pdb
                 pdb.set_trace()
+
+    def download_all_bills(self):
+        pg = 1
+        urls = set()
+
+        lns = -1
+        while len(urls) % 100 == 0 and lns != len(urls):
+            lns = len(urls)
+            html = requests.get(
+                self.sources['url'] + '?page={}'.format(pg)).text
+            soup = BeautifulSoup(html, 'html.parser')
+
+            for sp in soup.find_all('span', attrs={'class': 'result-heading'}):
+                url = sp.find('a').get('href')
+                url = url.split('?')[0] + '/all-info'
+                urls.add(url)
+
+            pg += 1
+
+        old_urls = set()
+        for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
+            data = json.load(open(f))
+
+            if 'all-info' not in data['sources']['url']:
+                old_urls.add(data['sources']['url'] + '/all-info')
+            else:
+                old_urls.add(data['sources']['url'])
+
+        new_urls = urls - old_urls
+        for u in tqdm(new_urls):
+            Bill(url=u)
 
     def refresh(self, force_reload=False):
         """
