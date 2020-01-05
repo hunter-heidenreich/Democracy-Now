@@ -3,6 +3,10 @@ function displaySubject() {
     console.log(value);
     if (value == 'Sponsor')
         displaySponsored();
+    else if (value == 'Sponsor (116th)')
+        $.getJSON('./data/count/sponsor_subj_now/', function(data) {
+            displayCount(data['res']);
+        });
     else if (value == 'Cosponsor')
         displayCosponsored();
 }

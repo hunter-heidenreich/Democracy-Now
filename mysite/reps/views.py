@@ -50,11 +50,8 @@ def view(request, name):
     if rep:
         rep = rep[0]
 
-        sponsor = HOUSE.search('reps', 'sponsor', rep.sources['url'])
-        sponsor &= HOUSE.search('bills', 'congress', 116)
-        sponsor = sorted(sponsor,
-                         key=lambda bill: bill.get_overview()['sponsor']['date'],
-                         reverse=True)
+        sponsored = HOUSE.search('reps', 'sponsor', rep.sources['url'])
+        sponsored_now = [b for b in sponsored if b.search('congress', 116)]
 
         cosponsor = HOUSE.search('reps', 'cosponsor', rep.sources['url'])
         cosponsor &= HOUSE.search('bills', 'congress', 116)
@@ -64,7 +61,8 @@ def view(request, name):
 
         context = {
             'rep': rep,
-            'sponsor': sponsor,
+            'sponsored': sponsored,
+            'sponsored now': sponsored_now,
             'cosponsor': cosponsor,
         }
         return HttpResponse(template.render(context, request))
@@ -80,6 +78,15 @@ def count_data(request, name, data):
         if data == 'sponsor_subj':
             sponsor = HOUSE.search('reps', 'sponsor', rep.sources['url'])
             cnt = Counter([bill.subjects['main']['title'] for bill in sponsor if 'main' in bill.subjects])
+            cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
+                         key=lambda x: x['value'], reverse=True)
+            res['res'] = cnt
+        elif data == 'sponsor_subj_now':
+            sponsor = HOUSE.search('reps', 'sponsor', rep.sources['url'])
+            sponsor = [b for b in sponsor if b.search('congress', 116)]
+            cnt = Counter(
+                [bill.subjects['main']['title'] for bill in sponsor if
+                 'main' in bill.subjects])
             cnt = sorted([{'label': k, 'value': v} for k, v in cnt.items()],
                          key=lambda x: x['value'], reverse=True)
             res['res'] = cnt
