@@ -46,7 +46,8 @@ def get_representative_urls():
     new_urls = set()
     for f in tqdm(glob('data/us/federal/house/bills/json/*.json')):
         data = json.load(open(f))
-        new_urls.add(data['overview']['sponsor']['url'])
+        if 'url' in data['overview']['sponsor']:
+            new_urls.add(data['overview']['sponsor']['url'])
         for co in data['cosponsors']:
             if 'congress.gov' not in co['cosponsors']['url']:
                 new_urls.add('https://www.congress.gov' + co['cosponsors']['url'])
