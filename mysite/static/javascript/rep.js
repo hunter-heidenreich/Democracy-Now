@@ -4,16 +4,20 @@ function displaySubject() {
     if (value == 'Sponsor')
         displaySponsored();
     else if (value == 'Sponsor (116th)')
-        $.getJSON('./data/count/sponsor_subj_now/', function(data) {
-            displayCount(data['res']);
-        });
+        displaySponsoredNow();
     else if (value == 'Cosponsor')
         displayCosponsored();
 }
 
 function displaySponsored() {
     $.getJSON('./data/count/sponsor_subj/', function(data) {
-        displayCount(data['res']);
+        displayCount(data['res'], '#sponsoredDiv');
+    });
+}
+
+function displaySponsoredNow() {
+    $.getJSON('./data/count/sponsor_subj_now/', function(data) {
+        displayCount(data['res'], '#sponsoredNowDiv');
     });
 }
 
@@ -23,8 +27,8 @@ function displayCosponsored() {
     });
 }
 
-function displayCount(data) {
-    $('#data-viz').empty();
+function displayCount(data, div) {
+    $(div).empty();
     var h = 600;
     var w = 800;
     var margin_fact = 0.25;
@@ -35,7 +39,7 @@ function displayCount(data) {
     height = h - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    var svg = d3.select("#data-viz")
+    var svg = d3.select(div)
                 .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
@@ -69,7 +73,7 @@ function displayCount(data) {
 
     // Add a tooltip div. Here I define the general feature of the tooltip: stuff that do not depend on the data point.
     // Its opacity is set to 0: we don't see it by default.
-    var tooltip = d3.select("#data-viz")
+    var tooltip = d3.select(div)
         .append("div")
             .style("opacity", 0)
             .attr("class", "tooltip")

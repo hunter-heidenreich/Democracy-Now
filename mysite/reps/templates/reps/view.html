@@ -55,29 +55,44 @@
             </table>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col">
+            <h2>Stats of Bills Sponsored by {{ rep.basics.name }} </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col text-center" id="sponsoredDiv">
+            <script>displaySponsored()</script>
+        </div>
+        <div class="col text-center" id="sponsoredNowDiv">
+            <script>displaySponsoredNow()</script>
+        </div>
+    </div>
+
+    <!--<div class="row">-->
+        <!--<div class="col">-->
+            <!--<div class="input-group mb-3">-->
+                <!--<div class="input-group-prepend">-->
+                    <!--<label class="input-group-text" for="billRelationSelect">Count Related Bills By Subject</label>-->
+                <!--</div>-->
+                <!--<select class="custom-select" id="billRelationSelect" onchange="displaySubject()">-->
+                    <!--<option selected>Choose...</option>-->
+                    <!--<option value="1">Sponsor</option>-->
+                    <!--<option value="2">Sponsor (116th)</option>-->
+                    <!--<option value="3">Cosponsor</option>-->
+                <!--</select>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+
+    <!--<div class="row">-->
+        <!--<div class="col">-->
+            <!--<div id="data-viz" class="text-center"></div>-->
+        <!--</div>-->
+    <!--</div>-->
     {% else %}
     <p>Rep not found.</p>
     {% endif %}
-
-    <div class="row">
-        <div class="col">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="billRelationSelect">Count Related Bills By Subject</label>
-                </div>
-                <select class="custom-select" id="billRelationSelect" onchange="displaySubject()">
-                    <option selected>Choose...</option>
-                    <option value="1">Sponsor</option>
-                    <option value="2">Sponsor (116th)</option>
-                    <option value="3">Cosponsor</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <div id="data-viz" class="text-center"></div>
-        </div>
-    </div>
 </div>
