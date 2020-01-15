@@ -1,8 +1,10 @@
-from django.shortcuts import render
-
-# Create your views here.
-from django.http import HttpResponse
+import sys
 from django.views.generic import TemplateView, ListView
+
+if 'tools/' not in sys.path:
+    sys.path.append('tools/')
+
+from database.congress import query_db
 
 
 class CoreIndex(TemplateView):
@@ -11,7 +13,6 @@ class CoreIndex(TemplateView):
 
 class QueryResult(ListView):
     template_name = 'demviz/queryres.html'
-    context_object_name = 'results'
 
     def __init__(self):
         self.cls = None
@@ -28,7 +29,7 @@ class QueryResult(ListView):
 
     def get_queryset(self):
         if self.cls == 'reps':
-            return []
+            return query_db('reps', {})
         elif self.cls == 'bills':
-            return []
+            return query_db('bills', {})
         return []
