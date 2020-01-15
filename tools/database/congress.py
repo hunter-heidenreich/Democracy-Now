@@ -57,3 +57,15 @@ class CongressData:
 
         return res
 
+
+database = CongressData()
+
+
+def query_db(group, query):
+    """
+
+    :param group:
+    :param query:
+    :return:
+    """
+    return database.query(group, query)
