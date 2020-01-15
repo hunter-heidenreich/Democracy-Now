@@ -234,7 +234,9 @@ class Representative:
             return self.overview['info']['party']
         elif 'party history' in self.overview['info']:
             for text in self.overview['info']['party history']:
-                pa, time = text.split()
+                splits = text.split()
+                pa = splits[:-1]
+                time = [-1]
                 if 'Present' in time:
                     return pa
             return None
