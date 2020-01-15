@@ -6,8 +6,8 @@ from collections import Counter
 
 import sys
 
-if '/Users/hunterheidenreich/git/democracy-now/tools/us/federal/house' not in sys.path:
-    sys.path.append('/Users/hunterheidenreich/git/democracy-now/tools/us/federal/house')
+if 'tools/us/federal/house' not in sys.path:
+    sys.path.append('tools/us/federal/house')
 
 from house import HOUSE
 

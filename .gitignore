@@ -4,3 +4,5 @@ data/*
 *.sqlite3
 *.cpython-36.pyc
 mysite/static/admin/*
+__pycache__
+.DS_store
