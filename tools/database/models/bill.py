@@ -4,7 +4,7 @@ from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-from utils import download_file, get_bill_urls
+from database.utils import download_file, get_bill_urls
 
 
 class Bill:

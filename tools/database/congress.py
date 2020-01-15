@@ -1,6 +1,7 @@
 from glob import glob
 from tqdm import tqdm
 
+from database.models.bill import Bill
 from database.models.vote import Vote
 
 import logging
@@ -20,7 +21,7 @@ class CongressData:
         logging.debug('DB::Loading database.')
 
         self.data = {}
-        self._data_type = [('votes', Vote)]
+        self._data_type = [('votes', Vote), ('bills', Bill)]
         for typ, cls in self._data_type:
             self._load_data(typ, cls)
 
@@ -28,4 +29,4 @@ class CongressData:
 
     def _load_data(self, typ, cls):
         logging.debug('DB::Loading {}'.format(typ))
-        self.data[typ] = tqdm([cls(filename=f) for f in glob(self.DATA_DIR + '/{}/json/*.json'.format(typ))])
+        self.data[typ] = [cls(filename=f) for f in tqdm(glob(self.DATA_DIR + '/{}/json/*.json'.format(typ)))]
