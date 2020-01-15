@@ -2,6 +2,8 @@ from glob import glob
 from tqdm import tqdm
 
 from database.models.bill import Bill
+from database.models.representative import Representative
+from database.models.session import Session
 from database.models.vote import Vote
 
 import logging
@@ -21,7 +23,7 @@ class CongressData:
         logging.debug('DB::Loading database.')
 
         self.data = {}
-        self._data_type = [('votes', Vote), ('bills', Bill)]
+        self._data_type = [('votes', Vote), ('bills', Bill), ('session', Session), ('reps', Representative)]
         for typ, cls in self._data_type:
             self._load_data(typ, cls)
 
