@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Core Title</title>
+    {% include "demviz/res.html" %}
+</head>
+<body>
+     {% include "demviz/nav.html" %}
+     <div class="container">
+         <div class="row">
+             <div class="col">
+                 <h1 class="h1">Find Your Representatives:</h1>
+             </div>
+         </div>
+         <div class="row">
+             <div class="col">
+                 <div class="input-group mb-3">
+                     <input type="text" class="form-control" placeholder="Enter your address" aria-label="Address search" aria-describedby="button-addon2">
+                     <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         <div class="row">
+             <div class="col">
+                 <h3 class="h3">Or search by:</h3>
+             </div>
+         </div>
+         <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label for="repsearch">Representative</label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="repsearch" id="repsearch" placeholder="Enter search terms" aria-label="Representative search" aria-describedby="button-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <div class="row">
+            <div class="col">
+                <div class="form-group">
+                    <label for="billsearch">Bills</label>
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="billsearch" id="billsearch" placeholder="Enter search terms" aria-label="Bill search" aria-describedby="button-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+</body>
+</html>
