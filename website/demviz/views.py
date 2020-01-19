@@ -1,4 +1,5 @@
 import sys
+
 from django.views.generic import TemplateView, ListView
 
 if 'tools/' not in sys.path:
@@ -29,6 +30,10 @@ class QueryResult(ListView):
 
     def get_queryset(self):
         if self.cls == 'reps':
+            addr = self.request.GET.get('addr')
+
+            import pdb
+            pdb.set_trace()
             return query_db('reps', {})
         elif self.cls == 'bills':
             return query_db('bills', {})
