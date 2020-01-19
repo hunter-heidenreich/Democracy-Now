@@ -19,6 +19,9 @@
                      {% for res in object_list %}
                         <tr>
                             <td>{{ res }}</td>
+                            <td>
+                                <a class="btn btn-info" href="{% url 'repsview' name=res.basics.name %}">Info</a>
+                            </td>
                         </tr>
                      {% endfor %}
                     </tbody>

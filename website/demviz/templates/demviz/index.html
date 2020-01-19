@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Core Title</title>
     {% include "demviz/res.html" %}
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
 <body>
      {% include "demviz/nav.html" %}
@@ -15,15 +18,16 @@
          </div>
          <div class="row">
              <div class="col">
-                 <div class="input-group mb-3">
-                     <form action="{% url 'qres' cls='reps' %}" method="get">
-                        <input type="text" name="addr" id="addr" class="form-control" placeholder="123 ABC St, City, State 00000" aria-label="Address search" aria-describedby="button-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                 <form action="{% url 'qres' cls='reps' %}" method="get" class="form-inline">
+                    <div class="form-group extend-form">
+                        <div class="input-group extend-input">
+                            <input type="text" name="addr" id="addr" class="form-control" placeholder="123 ABC St, City, State 00000" aria-label="Address search" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                            </div>
                         </div>
-                     </form>
-
-                 </div>
+                     </div>
+                 </form>
              </div>
          </div>
          <div class="row">

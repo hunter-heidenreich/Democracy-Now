@@ -1,0 +1,8 @@
+.extend-form {
+    display: block;
+    width: 100%;
+}
+
+.extend-input {
+    width: 100% !important;
+}
