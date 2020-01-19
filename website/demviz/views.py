@@ -1,3 +1,4 @@
+import re
 import sys
 
 from django.views.generic import TemplateView, ListView
@@ -31,9 +32,19 @@ class QueryResult(ListView):
     def get_queryset(self):
         if self.cls == 'reps':
             addr = self.request.GET.get('addr')
+            if addr:
+                match = re.match('^.*,\s(\w{2})\s(\d{5})$', addr)
+                if match:
+                    state = match.group(1)
+                    zipcode = match.group(2)
 
-            import pdb
-            pdb.set_trace()
+                    return query_db('reps', {
+                        'state': state,
+                        'active': True
+                    })
+                else:
+                    return []
+
             return query_db('reps', {})
         elif self.cls == 'bills':
             return query_db('bills', {})
