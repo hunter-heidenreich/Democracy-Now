@@ -32,6 +32,7 @@ class QueryResult(ListView):
     def get_queryset(self):
         if self.cls == 'reps':
             addr = self.request.GET.get('addr')
+            rep = self.request.GET.get('rep')
             if addr:
                 match = re.match('^.*,\s(\w{2})\s(\d{5})$', addr)
                 if match:
@@ -42,10 +43,13 @@ class QueryResult(ListView):
                         'state': state,
                         'active': True
                     })
-                else:
-                    return []
+            elif rep:
+                return query_db('reps', {
+                    'name': rep,
+                    'active': True
+                })
 
-            return query_db('reps', {})
+            return []
         elif self.cls == 'bills':
             return query_db('bills', {})
         return []
