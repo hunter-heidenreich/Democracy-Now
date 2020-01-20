@@ -54,15 +54,19 @@
         </div>
          <div class="row">
             <div class="col">
-                <div class="form-group">
-                    <label for="billsearch">Bills</label>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" name="billsearch" id="billsearch" placeholder="Enter search terms" aria-label="Bill search" aria-describedby="button-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+                <form action="{% url 'qres' cls='bills' %}" method="get" class="form-inline">
+                    <div class="form-group extend-form">
+                        <div class="input-group extend-input">
+                            <div class="input-group-prepend">
+                              <div class="input-group-text">Bill</div>
+                            </div>
+                            <input type="text" name="bill" id="bill" class="form-control" placeholder="Enter search terms" aria-label="Representative search" aria-describedby="button-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                     </div>
+                 </form>
             </div>
         </div>
      </div>

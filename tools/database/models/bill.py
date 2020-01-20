@@ -65,7 +65,7 @@ class Bill:
             raise ValueError('ValueError: Unspecified bill source.')
 
     def __repr__(self):
-        return self.title
+        return str(self._congress) + ' - ' + self.title
 
     def load_from_url(self, url, force_reload=False):
         """

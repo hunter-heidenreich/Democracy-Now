@@ -20,7 +20,11 @@
                         <tr>
                             <td>{{ res }}</td>
                             <td>
+                                {% if cls == 'reps' %}
                                 <a class="btn btn-info" href="{% url 'repsview' name=res.basics.name %}">Info</a>
+                                {% elif cls == 'bills' %}
+                                <a class="btn btn-info" href="{% url 'billsview' name=res %}">Info</a>
+                                {% endif %}
                             </td>
                         </tr>
                      {% endfor %}

@@ -27,6 +27,7 @@ class QueryResult(ListView):
         self.object_list = self.get_queryset()
 
         context = self.get_context_data()
+        context['cls'] = self.cls
         return self.render_to_response(context)
 
     def get_queryset(self):
