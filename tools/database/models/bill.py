@@ -638,14 +638,12 @@ class Bill:
         self.load_from_url(url=self._sources['url'])
         self.to_json()
 
-    def to_json(self):
+    def get_json(self):
         """
-        Dumps the Bill to a JSON readable format
+        Returns a Bill as a JSON for API
+        :return: The bill, as a JSON
         """
-        filename = '{}_{}.json'.format(self._congress,
-                                       self.title.split(' - ')[0])
-
-        json.dump({
+        return {
             'title': self.title,
             'congress': self._congress,
             'sources': self._sources,
@@ -662,7 +660,16 @@ class Bill:
             'text': self._text,
             'amendments': self._amendments,
             'cost': self._cost_estimates
-        }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
+        }
+
+    def to_json(self):
+        """
+        Dumps the Bill to a JSON readable format
+        """
+        filename = '{}_{}.json'.format(self._congress,
+                                       self.title.split(' - ')[0])
+
+        json.dump(self.get_json(), open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
         """

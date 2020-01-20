@@ -2,6 +2,7 @@ import re
 import sys
 
 from django.views.generic import TemplateView, ListView
+from django.http import JsonResponse
 
 if 'tools/' not in sys.path:
     sys.path.append('tools/')
@@ -54,3 +55,21 @@ class QueryResult(ListView):
         elif self.cls == 'bills':
             return query_db('bills', {})
         return []
+
+
+def json_reply(request, name):
+
+    if request.path.split('/')[1] == 'bill':
+        congress, title = name.split(' - ')
+        return JsonResponse(query_db('bills', {
+            'title': title,
+            'congress': int(congress)
+        })[0].get_json())
+    elif request.path.split('/')[1] == 'rep':
+        return JsonResponse(query_db('reps', {
+            'name': name
+        })[0].get_json())
+    import pdb
+    pdb.set_trace()
+
+    return JsonResponse({})

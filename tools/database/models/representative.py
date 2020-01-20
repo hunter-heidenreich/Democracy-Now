@@ -195,17 +195,26 @@ class Representative:
         """
         self.load(self.sources['url'], force_reload=force_reload)
 
+    def get_json(self):
+        """
+        Returns a Representative as a JSON for API
+        :return: The rep, as a JSON
+        """
+        filename = '{}.json'.format(self.basics['name'])
+        self.sources['json'] = self.ROOT_DIR + 'json/' + filename
+
+        return {
+            'sources': self.sources,
+            'basics': self.basics,
+            'overview': self.overview
+        }
+
     def to_json(self):
         """
         Dumps the Representative to a JSON readable format
         """
         filename = '{}.json'.format(self.basics['name'])
-        self.sources['json'] = self.ROOT_DIR + 'json/' + filename
-        json.dump({
-            'sources': self.sources,
-            'basics': self.basics,
-            'overview': self.overview
-        }, open(self.ROOT_DIR + 'json/' + filename, 'w+'))
+        json.dump(self.get_json(), open(self.ROOT_DIR + 'json/' + filename, 'w+'))
 
     def from_json(self, filename):
         """
